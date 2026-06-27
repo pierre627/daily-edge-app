@@ -396,8 +396,8 @@
 // ║  STEP 1: PASTE YOUR SUPABASE CONFIG BELOW           ║
 // ║  Get from: Supabase Dashboard → Settings → API      ║
 // ╚══════════════════════════════════════════════════════╝
-const SUPABASE_URL  = 'https://roygslfbzqrszmneaypl.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJveWdzbGZienFyc3ptbmVheXBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0ODk5NjcsImV4cCI6MjA5ODA2NTk2N30.m2lmHOJMnsn3NevoSLXRzl08VFpwPObPSJGGuZyzDuE';
+const SUPABASE_URL  = 'PASTE_YOUR_SUPABASE_URL_HERE';
+const SUPABASE_ANON = 'PASTE_YOUR_SUPABASE_ANON_KEY_HERE';
 
 // ══════════════════════════════════════
 // SUPABASE INIT
@@ -419,9 +419,9 @@ const HOURS = ['6:00 AM','7:00 AM','8:00 AM','9:00 AM','10:00 AM','11:00 AM','12
 let currentUser  = null;
 let currentDate  = todayStr();
 let wheelMode    = 'current';
+let configData   = { areas: DEFAULT_AREAS, habits: DEFAULT_HABITS, criteria: DEFAULT_CRITERIA, darkMode: false };
 let dayData      = defaultDayData();
 let weekData     = defaultWeekData();
-let configData   = { areas: DEFAULT_AREAS, habits: DEFAULT_HABITS, criteria: DEFAULT_CRITERIA, darkMode: false };
 let dayChannel   = null;
 let weekChannel  = null;
 let cfgChannel   = null;
