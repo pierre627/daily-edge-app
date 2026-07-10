@@ -478,9 +478,13 @@ function updateHeader() {
 }
 
 function buildTypeGrid() {
-  document.getElementById('typeGrid').innerHTML = Object.keys(TEMPLATES).map(t =>
-    `<button class="type-btn" onclick="selectType('${t.replace(/'/g,"\\'")}'">${t}</button>`
+  const grid = document.getElementById('typeGrid');
+  grid.innerHTML = Object.keys(TEMPLATES).map(t =>
+    `<button class="type-btn" data-wtype="${esc(t)}">${t}</button>`
   ).join('');
+  grid.querySelectorAll('.type-btn').forEach(btn => {
+    btn.addEventListener('click', () => selectType(btn.getAttribute('data-wtype')));
+  });
 }
 
 function buildRatingRow() {
@@ -606,7 +610,8 @@ function selectType(type) {
     if (type === 'Custom') workoutData.exercises = [];
   }
   // Show copy-last button if a previous session exists for this type
-  document.getElementById('copyLastWrap').style.display = lastSessions[type] ? 'block' : 'none';
+  const cw = document.getElementById('copyLastWrap');
+  if (cw) cw.style.display = lastSessions[type] ? 'block' : 'none';
   showWorkoutForm();
   renderWorkout();
   scheduleSave();
@@ -647,8 +652,8 @@ function renderWorkout() {
   document.querySelectorAll('.type-btn').forEach(b =>
     b.classList.toggle('active', b.textContent === workoutData.type));
   showWorkoutForm();
-  document.getElementById('copyLastWrap').style.display =
-    lastSessions[workoutData.type] ? 'block' : 'none';
+  const cw2 = document.getElementById('copyLastWrap');
+  if (cw2) cw2.style.display = lastSessions[workoutData.type] ? 'block' : 'none';
 
   sv('workoutName',  workoutData.workoutName);
   sv('workoutTime',  workoutData.workoutTime);
@@ -735,7 +740,7 @@ function renderExercises() {
 }
 
 function addExercise()          { workoutData.exercises.push({name:'',sets:[{weight:'',reps:'',done:false,warmup:false}],defaultReps:'',notes:''}); renderExercises(); scheduleSave(); }
-function deleteExercise(i)      { workoutData.exercises.splice(i,1); renderExercises(); scheduleSave(); }
+function deleteExercise(i)      { if (!confirm(`Remove "${workoutData.exercises[i].name || 'this exercise'}"?`)) return; workoutData.exercises.splice(i,1); renderExercises(); scheduleSave(); }
 function updateExName(i,val)    { workoutData.exercises[i].name = val; scheduleSave(); }
 function addSet(ei)             { workoutData.exercises[ei].sets.push({weight:'',reps:'',done:false,warmup:false}); renderExercises(); scheduleSave(); }
 function updateSet(ei,si,f,val) { workoutData.exercises[ei].sets[si][f] = val; scheduleSave(); }
