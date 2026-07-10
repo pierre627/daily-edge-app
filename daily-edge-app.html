@@ -377,9 +377,12 @@
   </div>
   <div class="card">
     <div class="card-title">Life Areas & Keystone Habits</div>
-    <p class="settings-note">Edit your areas, habits, and success criteria. Changes sync to all your devices.</p>
-    <div style="overflow-x:auto"><table class="settings-table"><thead><tr><th>Area</th><th>Habit</th><th>Success Criteria</th></tr></thead><tbody id="settingsBody"></tbody></table></div>
-    <div style="margin-top:12px"><button class="btn-primary" onclick="saveSettings()" style="width:100%" id="saveSettingsBtn">Save Changes</button></div>
+    <p class="settings-note">Add, edit, or remove your areas, habits, and success criteria. Changes sync to all your devices.</p>
+    <div style="overflow-x:auto"><table class="settings-table"><thead><tr><th>Area</th><th>Habit</th><th>Success Criteria</th><th></th></tr></thead><tbody id="settingsBody"></tbody></table></div>
+    <div style="margin-top:10px;display:flex;gap:8px">
+      <button class="btn-secondary" onclick="addSettingsRow()" style="flex:1">＋ Add Life Area</button>
+      <button class="btn-primary" onclick="saveSettings()" style="flex:1" id="saveSettingsBtn">Save Changes</button>
+    </div>
   </div>
   <div class="card">
     <div class="card-title">Appearance</div>
@@ -428,8 +431,8 @@
 // ║  STEP 1: PASTE YOUR SUPABASE CONFIG BELOW           ║
 // ║  Get from: Supabase Dashboard → Settings → API      ║
 // ╚══════════════════════════════════════════════════════╝
-const SUPABASE_URL  = 'https://roygslfbzqrszmneaypl.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJveWdzbGZienFyc3ptbmVheXBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0ODk5NjcsImV4cCI6MjA5ODA2NTk2N30.m2lmHOJMnsn3NevoSLXRzl08VFpwPObPSJGGuZyzDuE';
+const SUPABASE_URL  = 'PASTE_YOUR_SUPABASE_URL_HERE';
+const SUPABASE_ANON = 'PASTE_YOUR_SUPABASE_ANON_KEY_HERE';
 
 // ══════════════════════════════════════
 // SUPABASE INIT
@@ -963,26 +966,60 @@ function renderUserCard() {
   el.innerHTML = `${photoHtml}<div><div class="user-card-name">${escHtml(name)}</div><div class="user-card-email">${escHtml(currentUser.email||'')}</div></div>`;
 }
 
+function settingsRowHtml(area, habit, crit) {
+  return `<tr>
+    <td><input class="settings-input s-area" value="${escAttr(area)}" placeholder="Life Area"></td>
+    <td><input class="settings-input s-habit" value="${escAttr(habit)}" placeholder="Keystone Habit"></td>
+    <td><input class="settings-input s-crit" value="${escAttr(crit)}" placeholder="Success Criteria"></td>
+    <td style="text-align:center;padding:4px 6px"><button onclick="removeSettingsRow(this)" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1">×</button></td>
+  </tr>`;
+}
+
 function buildSettingsEditor() {
-  const areas = configData.areas || DEFAULT_AREAS;
-  const habits = configData.habits || DEFAULT_HABITS;
+  const areas    = configData.areas    || DEFAULT_AREAS;
+  const habits   = configData.habits   || DEFAULT_HABITS;
   const criteria = configData.criteria || DEFAULT_CRITERIA;
-  document.getElementById('settingsBody').innerHTML = areas.map((area,i) => `<tr><td><input class="settings-input" id="s_area_${i}" value="${escAttr(area)}"></td><td><input class="settings-input" id="s_habit_${i}" value="${escAttr(habits[i]||'')}"></td><td><input class="settings-input" id="s_crit_${i}" value="${escAttr(criteria[i]||'')}"></td></tr>`).join('');
+  document.getElementById('settingsBody').innerHTML = areas.map((area, i) =>
+    settingsRowHtml(area, habits[i] || '', criteria[i] || '')
+  ).join('');
+}
+
+function addSettingsRow() {
+  const tbody = document.getElementById('settingsBody');
+  const wrap = document.createElement('tbody');
+  wrap.innerHTML = settingsRowHtml('', '', '');
+  const tr = wrap.firstElementChild;
+  tbody.appendChild(tr);
+  tr.querySelector('.s-area')?.focus();
+}
+
+function removeSettingsRow(btn) {
+  const rows = document.querySelectorAll('#settingsBody tr');
+  if (rows.length <= 1) { alert('You need at least one life area.'); return; }
+  const tr = btn.closest('tr');
+  const area = tr.querySelector('.s-area')?.value.trim() || 'this area';
+  if (!confirm(`Remove "${area}"?`)) return;
+  tr.remove();
 }
 
 function saveSettings() {
-  const areas = configData.areas || DEFAULT_AREAS;
+  const rows = document.querySelectorAll('#settingsBody tr');
   const newAreas = [], newHabits = [], newCriteria = [];
-  areas.forEach((_,i) => {
-    newAreas.push(document.getElementById(`s_area_${i}`)?.value.trim() || areas[i]);
-    newHabits.push(document.getElementById(`s_habit_${i}`)?.value.trim() || '');
-    newCriteria.push(document.getElementById(`s_crit_${i}`)?.value.trim() || '');
+  rows.forEach(tr => {
+    const area = tr.querySelector('.s-area')?.value.trim();
+    if (!area) return; // skip blank rows
+    newAreas.push(area);
+    newHabits.push(tr.querySelector('.s-habit')?.value.trim() || '');
+    newCriteria.push(tr.querySelector('.s-crit')?.value.trim() || '');
   });
-  configData.areas = newAreas; configData.habits = newHabits; configData.criteria = newCriteria;
+  if (!newAreas.length) { alert('Please add at least one life area.'); return; }
+  configData.areas    = newAreas;
+  configData.habits   = newHabits;
+  configData.criteria = newCriteria;
   scheduleConfigSave();
   const btn = document.getElementById('saveSettingsBtn');
-  btn.textContent='✓ Saved!'; btn.style.background='var(--green)';
-  setTimeout(()=>{ btn.textContent='Save Changes'; btn.style.background=''; }, 2000);
+  btn.textContent = '✓ Saved!'; btn.style.background = 'var(--green)';
+  setTimeout(() => { btn.textContent = 'Save Changes'; btn.style.background = ''; }, 2000);
 }
 
 // ══════════════════════════════════════
