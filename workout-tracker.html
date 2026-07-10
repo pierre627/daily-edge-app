@@ -91,6 +91,10 @@
 
   /* ── Cardio ── */
   .cardio-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 6px; align-items: center; margin-bottom: 6px; }
+  .cardio-ex-card { background: var(--card2); border: 1px solid var(--border); border-radius: 12px; padding: 12px 12px 10px; margin-bottom: 10px; }
+  .cardio-field-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+  .cardio-fields { display: grid; grid-template-columns: 1fr 1.4fr; gap: 8px; margin-top: 8px; }
+  .cardio-picklist { background: var(--card2); border: 1px dashed var(--green); border-radius: 10px; color: var(--green); font-size: 13px; font-weight: 600; padding: 9px 10px; width: 100%; cursor: pointer; margin-bottom: 10px; outline: none; }
   .sm-input { background: var(--card2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; padding: 7px 8px; outline: none; width: 100%; }
   .sm-input:focus { border-color: var(--green); }
   .icon-btn { background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; padding: 2px; flex-shrink: 0; }
@@ -213,13 +217,12 @@
       <div class="card-title">Session Info</div>
       <div class="field-row">
         <div class="field"><label>Workout Name</label><input type="text" id="workoutName" placeholder="e.g. Chest Day A"></div>
-        <div class="field"><label>Duration</label><input type="text" id="workoutTime" placeholder="e.g. 45 min"></div>
+        <div class="field"><label>Duration (min)</label><input type="number" inputmode="numeric" id="workoutTime" placeholder="45"></div>
       </div>
       <div class="field-row">
         <div class="field"><label>Weight (lbs)</label><input type="number" id="scaleWeight" placeholder="185"></div>
-        <div class="field"><label>Body Fat %</label><input type="number" id="bodyFat" placeholder="18"></div>
       </div>
-      <div class="field-row">
+      <div class="field-row" style="display:none">
         <div class="field"><label>Fitness Goal</label>
           <select id="fitnessGoal">
             <option value="">Select...</option>
@@ -230,20 +233,14 @@
             <option>Other</option>
           </select>
         </div>
-        <div class="field"><label>Sleep (hrs)</label><input type="number" id="sleep" placeholder="7.5" step="0.5"></div>
+        <div class="field" style="display:none"><label>Sleep (hrs)</label><input type="number" id="sleep" placeholder="7.5" step="0.5"></div>
       </div>
     </div>
 
     <!-- Cardio -->
     <div class="card" id="cardioCard" style="display:none">
-      <div class="card-title">Cardio / Conditioning</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:6px;margin-bottom:5px;">
-        <span style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase">Exercise</span>
-        <span style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase">Time/Distance</span>
-        <span></span>
-      </div>
+      <div class="card-title" id="cardioCardTitle">Cardio / Conditioning</div>
       <div id="cardioRows"></div>
-      <button class="add-cardio-btn" onclick="addCardioRow()">+ Add Cardio Exercise</button>
     </div>
 
     <!-- Strength -->
@@ -447,16 +444,16 @@ const TEMPLATES = {
 // CARDIO EXERCISES (dedicated Cardio day)
 // ══════════════════════════════════════
 const CARDIO_EXERCISES = [
-  {name:'Brisk Outdoor Walk',             hint:'Duration · Distance (miles)'},
-  {name:'Incline Treadmill Walk',          hint:'Duration · Incline % · Speed (mph)'},
-  {name:'Stationary Bike Endurance Ride',  hint:'Duration · Distance · Resistance level'},
-  {name:'Stationary Bike Interval Ride',   hint:'Duration · # of intervals · High/Low resistance'},
-  {name:'Outdoor Road Bike Ride',          hint:'Duration · Distance (miles) · Avg speed'},
-  {name:'Swimming Laps',                   hint:'Duration · # of laps · Stroke type'},
-  {name:'Rowing Machine Workout',          hint:'Duration · Distance (meters) · Avg split (/500m)'},
-  {name:'Elliptical Trainer Workout',      hint:'Duration · Distance · Resistance level'},
-  {name:'Jump Rope Workout',               hint:'Duration · # of rounds'},
-  {name:'Bodyweight Cardio Circuit',       hint:'# of rounds · Total duration (30s on / 30s rest)'},
+  {name:'Brisk Outdoor Walk',             measureHint:'Distance (miles)'},
+  {name:'Incline Treadmill Walk',          measureHint:'Incline % · Speed (mph)'},
+  {name:'Stationary Bike Endurance Ride',  measureHint:'Distance (miles) · Resistance'},
+  {name:'Stationary Bike Interval Ride',   measureHint:'Intervals · High/Low resistance'},
+  {name:'Outdoor Road Bike Ride',          measureHint:'Distance (miles) · Avg speed'},
+  {name:'Swimming Laps',                   measureHint:'Laps · Stroke type'},
+  {name:'Rowing Machine Workout',          measureHint:'Distance (m) · Split (/500m)'},
+  {name:'Elliptical Trainer Workout',      measureHint:'Distance · Resistance'},
+  {name:'Jump Rope Workout',               measureHint:'Rounds completed'},
+  {name:'Bodyweight Cardio Circuit',       measureHint:'Rounds (30s on / 30s rest)'},
 ];
 
 // ══════════════════════════════════════
@@ -479,8 +476,8 @@ function todayStr() {
 }
 
 function defaultWorkout() {
-  return { type:'', workoutName:'', workoutTime:'', scaleWeight:'', bodyFat:'',
-           fitnessGoal:'', sleep:'', pushPull:'', cardio:[], exercises:[], rating:0, notes:'' };
+  return { type:'', workoutName:'', workoutTime:'', scaleWeight:'',
+           pushPull:'', cardio:[], exercises:[], rating:0, notes:'' };
 }
 
 // ══════════════════════════════════════
@@ -646,9 +643,9 @@ function selectType(type) {
   if (workoutData.type !== type) {
     workoutData.type = type;
     if (type === 'Cardio') {
-      // Dedicated cardio day: pre-load all cardio exercises, no strength
+      // Dedicated cardio day: start empty, user picks exercises from picklist
       workoutData.exercises = [];
-      workoutData.cardio = CARDIO_EXERCISES.map(e => ({exercise: e.name, detail: '', hint: e.hint}));
+      workoutData.cardio = [];
     } else {
       workoutData.exercises = TEMPLATES[type].map(t => ({
         name: t.name,
@@ -715,9 +712,6 @@ function renderWorkout() {
   sv('workoutName',  workoutData.workoutName);
   sv('workoutTime',  workoutData.workoutTime);
   sv('scaleWeight',  workoutData.scaleWeight);
-  sv('bodyFat',      workoutData.bodyFat);
-  sv('fitnessGoal',  workoutData.fitnessGoal);
-  sv('sleep',        workoutData.sleep);
   sv('workoutNotes', workoutData.notes);
 
   ['pushBtn','pullBtn','bothBtn'].forEach(id => document.getElementById(id).classList.remove('active'));
@@ -739,19 +733,71 @@ function renderWorkout() {
 // ══════════════════════════════════════
 function renderCardio() {
   const isCardio = workoutData.type === 'Cardio';
-  // Update section title for dedicated cardio days
-  const cardioTitle = document.querySelector('#cardioCard .card-title');
-  if (cardioTitle) cardioTitle.textContent = isCardio ? 'Cardio Session' : 'Cardio / Conditioning';
+  const title = document.getElementById('cardioCardTitle');
+  if (title) title.textContent = isCardio ? 'Cardio Session' : 'Cardio / Conditioning';
 
-  document.getElementById('cardioRows').innerHTML = (workoutData.cardio||[]).map((row,i) => `
-    <div class="cardio-row">
-      <input class="sm-input" value="${esc(row.exercise)}" placeholder="Exercise"
-        onchange="updateCardio(${i},'exercise',this.value)">
-      <input class="sm-input" value="${esc(row.detail)}"
-        placeholder="${esc(row.hint || 'Time / Distance')}"
-        onchange="updateCardio(${i},'detail',this.value)">
-      <button class="icon-btn" onclick="removeCardio(${i})">×</button>
-    </div>`).join('');
+  if (isCardio) {
+    // ── Dedicated Cardio day: picklist + per-exercise dual fields ──
+    const options = CARDIO_EXERCISES.map(e => `<option value="${esc(e.name)}">${esc(e.name)}</option>`).join('');
+    const exerciseCards = (workoutData.cardio||[]).map((row, i) => {
+      const def = CARDIO_EXERCISES.find(e => e.name === row.exercise) || {};
+      const mHint = def.measureHint || 'Measurement';
+      return `<div class="cardio-ex-card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:13px;font-weight:700;color:var(--text)">${esc(row.exercise)}</span>
+          <button class="icon-btn" onclick="removeCardio(${i})">×</button>
+        </div>
+        <div class="cardio-fields">
+          <div>
+            <div class="cardio-field-label">Duration (min)</div>
+            <input class="sm-input" type="number" inputmode="decimal" min="0" step="1"
+              value="${esc(row.duration||'')}" placeholder="30"
+              oninput="updateCardio(${i},'duration',this.value)">
+          </div>
+          <div>
+            <div class="cardio-field-label">${esc(mHint)}</div>
+            <input class="sm-input" type="text"
+              value="${esc(row.measurement||'')}" placeholder="${esc(mHint)}"
+              oninput="updateCardio(${i},'measurement',this.value)">
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    document.getElementById('cardioRows').innerHTML =
+      `<select class="cardio-picklist" onchange="addCardioFromPicklist(this)">
+        <option value="">＋ Add Exercise...</option>
+        ${options}
+      </select>
+      ${exerciseCards}`;
+  } else {
+    // ── Supplementary cardio (non-Cardio type day) ──
+    const headers = `<div style="display:grid;grid-template-columns:1fr 1fr auto;gap:6px;margin-bottom:5px">
+      <span style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase">Exercise</span>
+      <span style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase">Time/Distance</span>
+      <span></span></div>`;
+    const rows = (workoutData.cardio||[]).map((row,i) => `
+      <div class="cardio-row">
+        <input class="sm-input" value="${esc(row.exercise)}" placeholder="Exercise"
+          onchange="updateCardio(${i},'exercise',this.value)">
+        <input class="sm-input" value="${esc(row.detail||'')}"
+          placeholder="${esc(row.hint || 'Time / Distance')}"
+          onchange="updateCardio(${i},'detail',this.value)">
+        <button class="icon-btn" onclick="removeCardio(${i})">×</button>
+      </div>`).join('');
+    document.getElementById('cardioRows').innerHTML =
+      headers + rows +
+      `<button class="add-cardio-btn" onclick="addCardioRow()">+ Add Cardio Exercise</button>`;
+  }
+}
+
+function addCardioFromPicklist(sel) {
+  const name = sel.value;
+  if (!name) return;
+  sel.value = '';   // reset to placeholder
+  workoutData.cardio.push({exercise: name, duration: '', measurement: ''});
+  renderCardio();
+  scheduleSave();
 }
 
 function addCardioRow()              { workoutData.cardio.push({exercise:'',detail:''}); renderCardio(); }
@@ -851,18 +897,15 @@ function captureFormFields() {
   workoutData.workoutName  = gv('workoutName');
   workoutData.workoutTime  = gv('workoutTime');
   workoutData.scaleWeight  = gv('scaleWeight');
-  workoutData.bodyFat      = gv('bodyFat');
-  workoutData.fitnessGoal  = gv('fitnessGoal');
-  workoutData.sleep        = gv('sleep');
   workoutData.notes        = gv('workoutNotes');
 }
 
 document.addEventListener('change', e => {
-  if (['workoutName','workoutTime','scaleWeight','bodyFat','fitnessGoal','sleep','workoutNotes'].includes(e.target.id))
+  if (['workoutName','workoutTime','scaleWeight','workoutNotes'].includes(e.target.id))
     { captureFormFields(); scheduleSave(); }
 });
 document.addEventListener('input', e => {
-  if (['workoutName','workoutTime','scaleWeight','bodyFat','fitnessGoal','sleep','workoutNotes'].includes(e.target.id))
+  if (['workoutName','workoutTime','scaleWeight','workoutNotes'].includes(e.target.id))
     { captureFormFields(); scheduleSave(); }
 });
 
