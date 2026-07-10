@@ -133,10 +133,12 @@
 
   /* ── History ── */
   .hist-item { background: var(--card); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; cursor: pointer; }
-  .hist-date { font-size: 11px; font-weight: 700; color: var(--green); margin-bottom: 5px; }
+  .hist-date-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+  .hist-date { font-size: 11px; font-weight: 700; color: var(--green); }
   .hist-type { font-size: 15px; font-weight: 700; color: var(--text); }
   .hist-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
-  .hist-badge { float: right; font-size: 11px; background: var(--green-pale); color: var(--green); padding: 2px 8px; border-radius: 99px; font-weight: 700; }
+  .hist-badge { font-size: 11px; background: var(--green-pale); color: var(--green); padding: 2px 8px; border-radius: 99px; font-weight: 700; }
+  .hist-del { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; padding: 0 0 0 8px; line-height: 1; flex-shrink: 0; }
 
   /* ── PRs ── */
   .pr-item { background: var(--card); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
@@ -883,7 +885,13 @@ async function loadHistory() {
     const ratingBadge = d.rating ? `<span class="hist-badge">${d.rating}/10</span>` : '';
     const meta = [d.workoutTime, exCount ? `${exCount} exercises${volStr}` : ''].filter(Boolean).join(' · ');
     return `<div class="hist-item" onclick="loadHistoryWorkout('${row.date}')">
-      <div class="hist-date">${dateStr} ${ratingBadge}</div>
+      <div class="hist-date-row">
+        <span class="hist-date">${dateStr}</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          ${ratingBadge}
+          <button class="hist-del" onclick="event.stopPropagation();deleteWorkout('${row.date}')" title="Delete">🗑️</button>
+        </div>
+      </div>
       <div class="hist-type">${esc(d.type || 'Workout')}</div>
       <div class="hist-meta">${meta}</div>
     </div>`;
@@ -900,6 +908,25 @@ async function loadHistoryWorkout(date) {
   document.querySelectorAll('.nav-btn').forEach((b,i) => b.classList.toggle('active', i===0));
   updateHeader();
   renderWorkout();
+}
+
+async function deleteWorkout(date) {
+  const dateStr = new Date(date+'T12:00:00').toLocaleDateString('en-US',
+    {weekday:'short',month:'short',day:'numeric'});
+  if (!confirm(`Delete workout from ${dateStr}? This cannot be undone.`)) return;
+  const { error } = await sb.from('workouts').delete()
+    .eq('user_id', currentUser.id).eq('date', date);
+  if (error) { alert('Delete failed. Try again.'); return; }
+  // If deleted today's workout, reset the log screen
+  if (date === currentDate) {
+    workoutData = defaultWorkout();
+    document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+    ['workoutForm','cardioCard','strengthCard','ratingCard'].forEach(id =>
+      document.getElementById(id).style.display = 'none');
+    const cw = document.getElementById('copyLastWrap');
+    if (cw) cw.style.display = 'none';
+  }
+  loadHistory(); // refresh the list
 }
 
 // ══════════════════════════════════════
