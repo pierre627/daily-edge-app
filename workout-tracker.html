@@ -141,6 +141,9 @@
   .hist-date { font-size: 11px; font-weight: 700; color: var(--green); }
   .hist-type { font-size: 15px; font-weight: 700; color: var(--text); }
   .hist-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .hist-goal-tag { font-size: 10px; font-weight: 700; background: var(--green-pale); color: var(--green); border-radius: 6px; padding: 2px 7px; }
+  .goal-chip { border: 1.5px solid var(--border); background: var(--card2); color: var(--muted); border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .goal-chip.active { border-color: var(--green); background: var(--green-pale); color: var(--green); }
   .hist-badge { font-size: 11px; background: var(--green-pale); color: var(--green); padding: 2px 8px; border-radius: 99px; font-weight: 700; }
   .hist-del { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; padding: 0 0 0 8px; line-height: 1; flex-shrink: 0; }
 
@@ -221,8 +224,6 @@
       </div>
       <div class="field-row">
         <div class="field"><label>Weight (lbs)</label><input type="number" id="scaleWeight" placeholder="185"></div>
-      </div>
-      <div class="field-row" style="display:none">
         <div class="field"><label>Fitness Goal</label>
           <select id="fitnessGoal">
             <option value="">Select...</option>
@@ -233,7 +234,6 @@
             <option>Other</option>
           </select>
         </div>
-        <div class="field" style="display:none"><label>Sleep (hrs)</label><input type="number" id="sleep" placeholder="7.5" step="0.5"></div>
       </div>
     </div>
 
@@ -280,6 +280,7 @@
   <div class="screen" id="screen-history">
     <div class="sec-title">History</div>
     <div class="sec-sub">Your past sessions</div>
+    <div id="goalFilterBar" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px"></div>
     <div id="historyList"></div>
   </div>
 
@@ -464,7 +465,9 @@ let darkMode     = false;
 let currentDate  = todayStr();
 let saveTimer    = null;
 let workoutData  = defaultWorkout();
-let lastSessions = {}; // keyed by workout type → previous workout data
+let lastSessions     = {}; // keyed by workout type → previous workout data
+let allHistoryRows   = []; // cached for goal filtering
+let historyGoalFilter = 'All';
 
 // Rest timer
 let restInterval = null;
@@ -476,7 +479,7 @@ function todayStr() {
 }
 
 function defaultWorkout() {
-  return { type:'', workoutName:'', workoutTime:'', scaleWeight:'',
+  return { type:'', workoutName:'', workoutTime:'', scaleWeight:'', fitnessGoal:'',
            pushPull:'', cardio:[], exercises:[], rating:0, notes:'' };
 }
 
@@ -712,6 +715,7 @@ function renderWorkout() {
   sv('workoutName',  workoutData.workoutName);
   sv('workoutTime',  workoutData.workoutTime);
   sv('scaleWeight',  workoutData.scaleWeight);
+  sv('fitnessGoal',  workoutData.fitnessGoal);
   sv('workoutNotes', workoutData.notes);
 
   ['pushBtn','pullBtn','bothBtn'].forEach(id => document.getElementById(id).classList.remove('active'));
@@ -897,15 +901,16 @@ function captureFormFields() {
   workoutData.workoutName  = gv('workoutName');
   workoutData.workoutTime  = gv('workoutTime');
   workoutData.scaleWeight  = gv('scaleWeight');
+  workoutData.fitnessGoal  = gv('fitnessGoal');
   workoutData.notes        = gv('workoutNotes');
 }
 
 document.addEventListener('change', e => {
-  if (['workoutName','workoutTime','scaleWeight','workoutNotes'].includes(e.target.id))
+  if (['workoutName','workoutTime','scaleWeight','fitnessGoal','workoutNotes'].includes(e.target.id))
     { captureFormFields(); scheduleSave(); }
 });
 document.addEventListener('input', e => {
-  if (['workoutName','workoutTime','scaleWeight','workoutNotes'].includes(e.target.id))
+  if (['workoutName','workoutTime','scaleWeight','fitnessGoal','workoutNotes'].includes(e.target.id))
     { captureFormFields(); scheduleSave(); }
 });
 
@@ -966,12 +971,50 @@ async function loadHistory() {
   const el = document.getElementById('historyList');
   el.innerHTML = '<div class="empty"><div class="empty-icon">⏳</div>Loading...</div>';
   const { data } = await sb.from('workouts').select('date,data')
-    .eq('user_id', currentUser.id).order('date', {ascending:false}).limit(50);
+    .eq('user_id', currentUser.id).order('date', {ascending:false}).limit(100);
   if (!data || !data.length) {
     el.innerHTML = '<div class="empty"><div class="empty-icon">📋</div>No workouts yet. Log your first session!</div>';
+    document.getElementById('goalFilterBar').innerHTML = '';
     return;
   }
-  el.innerHTML = data.map(row => {
+  allHistoryRows = data;
+  buildGoalFilterBar(data);
+  renderHistory();
+}
+
+function buildGoalFilterBar(data) {
+  // Collect distinct goals present in the data
+  const goals = ['All', ...new Set(
+    data.map(r => (r.data||{}).fitnessGoal).filter(Boolean)
+  )];
+  const bar = document.getElementById('goalFilterBar');
+  bar.innerHTML = goals.map(g =>
+    `<button class="goal-chip${g === historyGoalFilter ? ' active' : ''}"
+      onclick="filterHistory('${esc(g)}')">${g}</button>`
+  ).join('');
+}
+
+function filterHistory(goal) {
+  historyGoalFilter = goal;
+  // Update chip active state
+  document.querySelectorAll('.goal-chip').forEach(c =>
+    c.classList.toggle('active', c.textContent === goal)
+  );
+  renderHistory();
+}
+
+function renderHistory() {
+  const el = document.getElementById('historyList');
+  const rows = historyGoalFilter === 'All'
+    ? allHistoryRows
+    : allHistoryRows.filter(r => (r.data||{}).fitnessGoal === historyGoalFilter);
+
+  if (!rows.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div>No ${historyGoalFilter} workouts logged yet.</div>`;
+    return;
+  }
+
+  el.innerHTML = rows.map(row => {
     const d = row.data || {};
     const dateStr = new Date(row.date+'T12:00:00').toLocaleDateString('en-US',
       {weekday:'short',month:'short',day:'numeric',year:'numeric'});
@@ -979,7 +1022,8 @@ async function loadHistory() {
     const vol = calcVolume(d);
     const volStr = vol > 0 ? ` · ${fmtVol(vol)} lbs` : '';
     const ratingBadge = d.rating ? `<span class="hist-badge">${d.rating}/10</span>` : '';
-    const meta = [d.workoutTime, exCount ? `${exCount} exercises${volStr}` : ''].filter(Boolean).join(' · ');
+    const goalTag = d.fitnessGoal ? `<span class="hist-goal-tag">${esc(d.fitnessGoal)}</span>` : '';
+    const meta = [d.workoutTime ? d.workoutTime + ' min' : '', exCount ? `${exCount} exercises${volStr}` : ''].filter(Boolean).join(' · ');
     return `<div class="hist-item" onclick="loadHistoryWorkout('${row.date}')">
       <div class="hist-date-row">
         <span class="hist-date">${dateStr}</span>
@@ -988,7 +1032,10 @@ async function loadHistory() {
           <button class="hist-del" onclick="event.stopPropagation();deleteWorkout('${row.date}')" title="Delete">🗑️</button>
         </div>
       </div>
-      <div class="hist-type">${esc(d.type || 'Workout')}</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+        <span class="hist-type">${esc(d.type || 'Workout')}</span>
+        ${goalTag}
+      </div>
       <div class="hist-meta">${meta}</div>
     </div>`;
   }).join('');
