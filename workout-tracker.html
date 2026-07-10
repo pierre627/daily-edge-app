@@ -408,8 +408,25 @@ const TEMPLATES = {
     {name:'Donkey Calf Raise',sets:3,reps:'12,10,8'},
     {name:'Seated/Standing Calf Raise',sets:3,reps:'12,10,8'},
   ],
+  'Cardio': [],
   'Custom': [],
 };
+
+// ══════════════════════════════════════
+// CARDIO EXERCISES (dedicated Cardio day)
+// ══════════════════════════════════════
+const CARDIO_EXERCISES = [
+  {name:'Brisk Outdoor Walk',             hint:'Duration · Distance (miles)'},
+  {name:'Incline Treadmill Walk',          hint:'Duration · Incline % · Speed (mph)'},
+  {name:'Stationary Bike Endurance Ride',  hint:'Duration · Distance · Resistance level'},
+  {name:'Stationary Bike Interval Ride',   hint:'Duration · # of intervals · High/Low resistance'},
+  {name:'Outdoor Road Bike Ride',          hint:'Duration · Distance (miles) · Avg speed'},
+  {name:'Swimming Laps',                   hint:'Duration · # of laps · Stroke type'},
+  {name:'Rowing Machine Workout',          hint:'Duration · Distance (meters) · Avg split (/500m)'},
+  {name:'Elliptical Trainer Workout',      hint:'Duration · Distance · Resistance level'},
+  {name:'Jump Rope Workout',               hint:'Duration · # of rounds'},
+  {name:'Bodyweight Cardio Circuit',       hint:'# of rounds · Total duration (30s on / 30s rest)'},
+];
 
 // ══════════════════════════════════════
 // STATE
@@ -597,17 +614,23 @@ function selectType(type) {
   document.querySelectorAll('.type-btn').forEach(b => b.classList.toggle('active', b.textContent === type));
   if (workoutData.type !== type) {
     workoutData.type = type;
-    workoutData.exercises = TEMPLATES[type].map(t => ({
-      name: t.name,
-      sets: Array(t.sets).fill(null).map(() => ({weight:'', reps:'', done:false, warmup:false})),
-      defaultReps: t.reps,
-      notes: ''
-    }));
-    workoutData.cardio = [
-      {exercise:'Bike (Indoor/Outdoor)', detail:''},
-      {exercise:'Treadmill', detail:''},
-    ];
-    if (type === 'Custom') workoutData.exercises = [];
+    if (type === 'Cardio') {
+      // Dedicated cardio day: pre-load all cardio exercises, no strength
+      workoutData.exercises = [];
+      workoutData.cardio = CARDIO_EXERCISES.map(e => ({exercise: e.name, detail: '', hint: e.hint}));
+    } else {
+      workoutData.exercises = TEMPLATES[type].map(t => ({
+        name: t.name,
+        sets: Array(t.sets).fill(null).map(() => ({weight:'', reps:'', done:false, warmup:false})),
+        defaultReps: t.reps,
+        notes: ''
+      }));
+      workoutData.cardio = [
+        {exercise:'Bike (Indoor/Outdoor)', detail:''},
+        {exercise:'Treadmill', detail:''},
+      ];
+      if (type === 'Custom') workoutData.exercises = [];
+    }
   }
   // Show copy-last button if a previous session exists for this type
   const cw = document.getElementById('copyLastWrap');
@@ -618,8 +641,11 @@ function selectType(type) {
 }
 
 function showWorkoutForm() {
-  ['workoutForm','cardioCard','strengthCard','ratingCard'].forEach(id =>
+  const isCardio = workoutData.type === 'Cardio';
+  ['workoutForm','cardioCard','ratingCard'].forEach(id =>
     document.getElementById(id).style.display = 'block');
+  // Hide strength section on dedicated cardio days
+  document.getElementById('strengthCard').style.display = isCardio ? 'none' : 'block';
 }
 
 // ══════════════════════════════════════
@@ -681,11 +707,17 @@ function renderWorkout() {
 // CARDIO
 // ══════════════════════════════════════
 function renderCardio() {
+  const isCardio = workoutData.type === 'Cardio';
+  // Update section title for dedicated cardio days
+  const cardioTitle = document.querySelector('#cardioCard .card-title');
+  if (cardioTitle) cardioTitle.textContent = isCardio ? 'Cardio Session' : 'Cardio / Conditioning';
+
   document.getElementById('cardioRows').innerHTML = (workoutData.cardio||[]).map((row,i) => `
     <div class="cardio-row">
       <input class="sm-input" value="${esc(row.exercise)}" placeholder="Exercise"
         onchange="updateCardio(${i},'exercise',this.value)">
-      <input class="sm-input" value="${esc(row.detail)}" placeholder="Time / Distance"
+      <input class="sm-input" value="${esc(row.detail)}"
+        placeholder="${esc(row.hint || 'Time / Distance')}"
         onchange="updateCardio(${i},'detail',this.value)">
       <button class="icon-btn" onclick="removeCardio(${i})">×</button>
     </div>`).join('');
