@@ -200,6 +200,23 @@
   .user-card-initials { width: 44px; height: 44px; border-radius: 50%; background: var(--purple); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; color: white; flex-shrink: 0; }
   .user-card-name { font-weight: 700; font-size: 15px; }
   .user-card-email { font-size: 12px; color: var(--muted); }
+  /* ── Monthly ── */
+  .ms-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 1rem; }
+  .ms-dow { text-align: center; font-size: 10px; color: var(--muted); padding: 4px 0; font-weight: 600; }
+  .ms-day { aspect-ratio: 1; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: var(--muted); }
+  .ms-day.has-entry { background: rgba(124,58,237,0.12); color: var(--purple); font-weight: 600; }
+  .ms-day.today { background: var(--purple); color: white; font-weight: 700; }
+  .ms-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--purple); margin-top: 2px; }
+  .ms-dot.today-dot { background: white; }
+  .ms-stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 1rem; }
+  .ms-stat { background: var(--card); border-radius: 10px; padding: 12px; text-align: center; }
+  .ms-stat-val { font-size: 20px; font-weight: 700; color: var(--purple); }
+  .ms-stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .ms-area-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .ms-area-name { font-size: 12px; color: var(--text); min-width: 110px; }
+  .ms-bar-track { flex: 1; height: 5px; background: var(--card2); border-radius: 99px; overflow: hidden; }
+  .ms-bar-fill { height: 100%; border-radius: 99px; }
+  .ms-delta-label { font-size: 11px; min-width: 28px; text-align: right; font-weight: 600; }
 
   /* ── Loading spinner ── */
   .spinner { display: flex; align-items: center; justify-content: center; height: 60px; }
@@ -378,11 +395,26 @@
   </div>
 </div>
 
+<div class="screen" id="screen-monthly">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <button class="date-nav-btn" onclick="changeMonth(-1)">‹</button>
+    <div id="monthLabel" style="font-size:16px;font-weight:700;color:var(--text)"></div>
+    <button class="date-nav-btn" onclick="changeMonth(1)">›</button>
+  </div>
+  <div class="ms-cal-grid" id="calendarGrid"></div>
+  <div class="ms-stat-row" id="monthStats"></div>
+  <div class="card">
+    <div class="card-title">Wheel of Life — Month Change</div>
+    <div id="monthWheelBars"><div style="color:var(--muted);font-size:13px">Loading...</div></div>
+  </div>
+</div>
+
 <nav class="nav">
   <button class="nav-btn active" onclick="showScreen('today',this)"><span class="nav-icon">📋</span>Today</button>
   <button class="nav-btn" onclick="showScreen('reflect',this)"><span class="nav-icon">✨</span>Reflect</button>
   <button class="nav-btn" onclick="showScreen('weekly',this)"><span class="nav-icon">🎯</span>Weekly</button>
   <button class="nav-btn" onclick="showScreen('progress',this)"><span class="nav-icon">📈</span>Progress</button>
+  <button class="nav-btn" onclick="showScreen('monthly',this)"><span class="nav-icon">📅</span>Monthly</button>
   <button class="nav-btn" onclick="showScreen('settings',this)"><span class="nav-icon">⚙️</span>Settings</button>
 </nav>
 
@@ -396,8 +428,8 @@
 // ║  STEP 1: PASTE YOUR SUPABASE CONFIG BELOW           ║
 // ║  Get from: Supabase Dashboard → Settings → API      ║
 // ╚══════════════════════════════════════════════════════╝
-const SUPABASE_URL  = 'https://roygslfbzqrszmneaypl.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJveWdzbGZienFyc3ptbmVheXBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0ODk5NjcsImV4cCI6MjA5ODA2NTk2N30.m2lmHOJMnsn3NevoSLXRzl08VFpwPObPSJGGuZyzDuE';
+const SUPABASE_URL  = 'PASTE_YOUR_SUPABASE_URL_HERE';
+const SUPABASE_ANON = 'PASTE_YOUR_SUPABASE_ANON_KEY_HERE';
 
 // ══════════════════════════════════════
 // SUPABASE INIT
@@ -687,6 +719,7 @@ function showScreen(name, btn) {
   btn.classList.add('active');
   if (name === 'weekly')   { buildWeeklySummary(); buildHabitTable(); buildWheelControls(); drawWheel(); renderWeekReview(); }
   if (name === 'progress') { buildProgressTable(); buildQualityTable(); renderProgressReview(); }
+  if (name === 'monthly')  { buildMonthlyView(); }
   if (name === 'settings') { buildSettingsEditor(); renderUserCard(); }
 }
 
@@ -986,6 +1019,97 @@ async function exportData() {
   const a = document.createElement('a'); a.href = url;
   a.download = `daily-edge-backup-${todayStr()}.json`;
   a.click(); URL.revokeObjectURL(url);
+}
+
+// ══════════════════════════════════════
+// MONTHLY
+// ══════════════════════════════════════
+let monthlyYear  = new Date().getFullYear();
+let monthlyMonth = new Date().getMonth();
+
+async function buildMonthlyView() {
+  const areas = configData.areas || DEFAULT_AREAS;
+  const d0 = new Date(monthlyYear, monthlyMonth, 1);
+  document.getElementById('monthLabel').textContent = d0.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+
+  const firstDay = `${monthlyYear}-${String(monthlyMonth+1).padStart(2,'0')}-01`;
+  const lastDay  = `${monthlyYear}-${String(monthlyMonth+1).padStart(2,'0')}-${String(new Date(monthlyYear, monthlyMonth+1, 0).getDate()).padStart(2,'0')}`;
+  const firstWeek = getWeekStr(firstDay);
+  const lastWeek  = getWeekStr(lastDay);
+
+  const [daysRes, weeksRes] = await Promise.all([
+    sb.from('days').select('date,data').eq('user_id', currentUser.id).gte('date', firstDay).lte('date', lastDay),
+    sb.from('weeks').select('week_start,data').eq('user_id', currentUser.id).gte('week_start', firstWeek).lte('week_start', lastWeek)
+  ]);
+
+  const hasEntry = d => d && (d.affirmation || d.grat1 || (d.todos && d.todos.length));
+  const entryDates = new Set((daysRes.data||[]).filter(r => hasEntry(r.data)).map(r => r.date));
+
+  buildMonthlyCalendar(entryDates);
+
+  // Habit rate
+  let habitsDone = 0, habitsTotal = 0;
+  (weeksRes.data||[]).forEach(w => {
+    (w.data?.habits||[]).forEach(row => row.forEach(v => { habitsTotal++; if(v) habitsDone++; }));
+  });
+  const habitPct = habitsTotal > 0 ? Math.round((habitsDone/habitsTotal)*100) : 0;
+
+  // Avg wheel delta (first vs last week)
+  let avgDelta = '—';
+  const sorted = [...(weeksRes.data||[])].sort((a,b) => a.week_start.localeCompare(b.week_start));
+  if (sorted.length >= 2) {
+    const first = sorted[0].data?.wheelCurrent || [];
+    const last  = sorted[sorted.length-1].data?.wheelCurrent || [];
+    if (first.length && last.length) {
+      const delta = last.reduce((s,v,i) => s + (v-(first[i]||0)), 0) / last.length;
+      avgDelta = (delta >= 0 ? '+' : '') + delta.toFixed(1);
+    }
+  }
+
+  document.getElementById('monthStats').innerHTML = `
+    <div class="ms-stat"><div class="ms-stat-val">${entryDates.size}</div><div class="ms-stat-label">Days logged</div></div>
+    <div class="ms-stat"><div class="ms-stat-val">${habitPct}%</div><div class="ms-stat-label">Habit rate</div></div>
+    <div class="ms-stat"><div class="ms-stat-val">${avgDelta}</div><div class="ms-stat-label">Avg score Δ</div></div>`;
+
+  if (sorted.length >= 2) {
+    const first = sorted[0].data?.wheelCurrent || Array(areas.length).fill(5);
+    const last  = sorted[sorted.length-1].data?.wheelCurrent || Array(areas.length).fill(5);
+    document.getElementById('monthWheelBars').innerHTML = areas.map((area,i) => {
+      const delta = (last[i]||5) - (first[i]||5);
+      const pct   = Math.round(((last[i]||5)/10)*100);
+      const color = delta > 0 ? 'var(--green)' : delta < 0 ? 'var(--red)' : 'var(--purple)';
+      const label = (delta > 0 ? '+' : '') + delta;
+      return `<div class="ms-area-row"><span class="ms-area-name">${escHtml(area)}</span><div class="ms-bar-track"><div class="ms-bar-fill" style="width:${pct}%;background:${color}"></div></div><span class="ms-delta-label" style="color:${color}">${label}</span></div>`;
+    }).join('');
+  } else {
+    document.getElementById('monthWheelBars').innerHTML = '<div style="color:var(--muted);font-size:13px">Complete a weekly review to see progress here.</div>';
+  }
+}
+
+function buildMonthlyCalendar(entryDates) {
+  const today = todayStr();
+  const daysInMonth = new Date(monthlyYear, monthlyMonth+1, 0).getDate();
+  const firstDow = new Date(monthlyYear, monthlyMonth, 1).getDay();
+  const offset = (firstDow + 6) % 7;
+  const DOW = ['M','T','W','T','F','S','S'];
+  let html = DOW.map(d => `<div class="ms-dow">${d}</div>`).join('');
+  for (let i = 0; i < offset; i++) html += '<div class="ms-day"></div>';
+  for (let day = 1; day <= daysInMonth; day++) {
+    const ds = `${monthlyYear}-${String(monthlyMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const isToday   = ds === today;
+    const hasIt     = entryDates.has(ds);
+    const cls = isToday ? 'ms-day today' : hasIt ? 'ms-day has-entry' : 'ms-day';
+    const dot = (hasIt || isToday) ? `<div class="ms-dot${isToday?' today-dot':''}"></div>` : '';
+    html += `<div class="${cls}">${day}${dot}</div>`;
+  }
+  document.getElementById('calendarGrid').innerHTML = html;
+}
+
+function changeMonth(delta) {
+  monthlyMonth += delta;
+  if (monthlyMonth > 11) { monthlyMonth = 0; monthlyYear++; }
+  if (monthlyMonth < 0)  { monthlyMonth = 11; monthlyYear--; }
+  buildMonthlyView();
 }
 
 // ══════════════════════════════════════
