@@ -66,6 +66,10 @@
   .card-title { font-size: 11px; font-weight: 700; color: var(--green); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
   .sec-title { font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 2px; }
   .sec-sub { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
+  .date-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .date-nav-btn { background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 20px; width: 38px; height: 38px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .date-nav-btn:disabled { opacity: 0.3; cursor: default; }
+  .date-nav-label { font-size: 13px; font-weight: 700; color: var(--green); text-align: center; }
 
   /* ── Workout type ── */
   .type-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
@@ -206,8 +210,11 @@
 
   <!-- ── LOG SCREEN ── -->
   <div class="screen active" id="screen-log">
-    <div class="sec-title">Log Workout</div>
-    <div class="sec-sub" id="logDateLabel"></div>
+    <div class="date-nav">
+      <button class="date-nav-btn" onclick="changeLogDay(-1)">‹</button>
+      <span class="date-nav-label" id="logDateLabel"></span>
+      <button class="date-nav-btn" id="logDateFwd" onclick="changeLogDay(1)">›</button>
+    </div>
 
     <!-- Workout Type -->
     <div class="card">
@@ -519,10 +526,15 @@ async function startApp() {
 
 function updateHeader() {
   const d = new Date(currentDate + 'T12:00:00');
+  const isToday = currentDate === todayStr();
   document.getElementById('headerDate').textContent =
     d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-  document.getElementById('logDateLabel').textContent =
-    d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  const dateLabel = isToday
+    ? 'Today · ' + d.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'})
+    : d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  document.getElementById('logDateLabel').textContent = dateLabel;
+  const fwd = document.getElementById('logDateFwd');
+  if (fwd) fwd.disabled = isToday;
 }
 
 function buildTypeGrid() {
@@ -589,6 +601,23 @@ async function loadTodayWorkout() {
     workoutData = { ...defaultWorkout(), ...data.data };
     renderWorkout();
   }
+}
+
+async function changeLogDay(delta) {
+  const d = new Date(currentDate + 'T12:00:00');
+  d.setDate(d.getDate() + delta);
+  const next = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  if (next > todayStr()) return; // no future dates
+  currentDate = next;
+  // Reset the log UI
+  workoutData = defaultWorkout();
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+  ['workoutForm','cardioCard','strengthCard','ratingCard'].forEach(id =>
+    document.getElementById(id).style.display = 'none');
+  const cw = document.getElementById('copyLastWrap');
+  if (cw) cw.style.display = 'none';
+  updateHeader();
+  await loadTodayWorkout();
 }
 
 function scheduleSave() {
