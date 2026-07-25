@@ -91,9 +91,10 @@
   .todo-cb { appearance: none; width: 20px; height: 20px; border: 2px solid var(--purple); border-radius: 5px; cursor: pointer; flex-shrink: 0; position: relative; }
   .todo-cb:checked { background: var(--purple); }
   .todo-cb:checked::after { content: '✓'; position: absolute; color: white; font-size: 12px; top: 50%; left: 50%; transform: translate(-50%,-50%); }
-  .todo-label { flex: 1; font-size: 14px; }
+  .todo-label { flex: 1; font-size: 14px; cursor: text; }
   .todo-label.done { text-decoration: line-through; color: var(--muted); }
   .todo-del { background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; padding: 0 4px; }
+  .todo-edit-input { flex: 1; background: var(--card2); border: 1.5px solid var(--purple); border-radius: 6px; color: var(--text); font-size: 14px; padding: 3px 8px; outline: none; font-family: inherit; }
 
   /* ── Schedule ── */
   .schedule-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
@@ -490,7 +491,38 @@ function setSyncStatus(status) {
   dot.className = 'sync-dot' + (status === 'saving' ? ' saving' : status === 'offline' ? ' offline' : '');
   dot.title = status === 'saving' ? 'Saving...' : status === 'offline' ? 'Offline' : 'Synced';
 }
-window.addEventListener('online',  () => setSyncStatus('synced'));
+// ══════════════════════════════════════
+// LOCAL CACHE (offline support)
+// ══════════════════════════════════════
+function lsKey(table, id) { return `de_${table}_${currentUser?.id}_${id}`; }
+function lsGet(table, id) { try { const v = localStorage.getItem(lsKey(table,id)); return v ? JSON.parse(v) : null; } catch(e) { return null; } }
+function lsSet(table, id, data) { try { localStorage.setItem(lsKey(table,id), JSON.stringify(data)); } catch(e) {} }
+function getPending() { try { return JSON.parse(localStorage.getItem(`de_pending_${currentUser?.id}`) || '[]'); } catch(e) { return []; } }
+function setPending(arr) { try { localStorage.setItem(`de_pending_${currentUser?.id}`, JSON.stringify(arr)); } catch(e) {} }
+function queuePending(op) { const p = getPending(); // dedupe by table+key
+  const key = op.table + '|' + JSON.stringify(op.row.date || op.row.week_start || 'cfg');
+  const idx = p.findIndex(x => x._key === key);
+  op._key = key;
+  if (idx >= 0) p[idx] = op; else p.push(op);
+  setPending(p);
+}
+
+async function flushPendingWrites() {
+  if (!currentUser || !navigator.onLine) return;
+  const pending = getPending();
+  if (!pending.length) return;
+  const failed = [];
+  for (const op of pending) {
+    try {
+      const { error } = await sb.from(op.table).upsert(op.row, { onConflict: op.conflict });
+      if (error) failed.push(op);
+    } catch(e) { failed.push(op); }
+  }
+  setPending(failed);
+  if (!failed.length) setSyncStatus('synced');
+}
+
+window.addEventListener('online',  () => { setSyncStatus('synced'); flushPendingWrites(); });
 window.addEventListener('offline', () => setSyncStatus('offline'));
 
 // ══════════════════════════════════════
@@ -544,30 +576,47 @@ function teardownListeners() {
 // SUPABASE DATA LOADERS
 // ══════════════════════════════════════
 async function loadConfig() {
-  const { data } = await sb.from('config').select('data').eq('user_id', currentUser.id).maybeSingle();
-  if (data?.data) configData = { ...configData, ...data.data };
-  applyTheme();
-  loadDay();
-  loadWeek();
-  renderUserCard();
+  // Show cached config immediately so app is usable offline
+  const cached = lsGet('config', 'main');
+  if (cached) { configData = { ...configData, ...cached }; applyTheme(); }
+  loadDay(); loadWeek(); renderUserCard(); // render with cache right away
+  try {
+    const { data } = await sb.from('config').select('data').eq('user_id', currentUser.id).maybeSingle();
+    if (data?.data) { configData = { ...configData, ...data.data }; lsSet('config', 'main', data.data); applyTheme(); }
+  } catch(e) {} // offline — cached data already applied
   subscribeConfig();
 }
 
 async function loadDay(ds) {
   const date = ds || currentDate;
-  const { data } = await sb.from('days').select('data').eq('user_id', currentUser.id).eq('date', date).maybeSingle();
-  dayData = data?.data ? { ...defaultDayData(), ...data.data } : defaultDayData();
-  renderDay();
+  // Show cached data immediately
+  const cached = lsGet('day', date);
+  if (cached) { dayData = { ...defaultDayData(), ...cached }; renderDay(); }
+  try {
+    const { data } = await sb.from('days').select('data').eq('user_id', currentUser.id).eq('date', date).maybeSingle();
+    if (data?.data) { dayData = { ...defaultDayData(), ...data.data }; lsSet('day', date, data.data); renderDay(); }
+    else if (!cached) { dayData = defaultDayData(); renderDay(); }
+  } catch(e) { if (!cached) { dayData = defaultDayData(); renderDay(); } }
   subscribeDayChanges();
 }
 
 async function loadWeek(ws) {
   const weekStart = ws || getWeekStr();
-  const { data } = await sb.from('weeks').select('data').eq('user_id', currentUser.id).eq('week_start', weekStart).maybeSingle();
-  weekData = data?.data ? { ...defaultWeekData(), ...data.data } : defaultWeekData();
+  // Show cached data immediately
+  const cached = lsGet('week', weekStart);
+  if (cached) { weekData = { ...defaultWeekData(), ...cached }; }
+  else weekData = defaultWeekData();
   const active = document.querySelector('.screen.active')?.id;
   if (active === 'screen-weekly')  { buildWeeklySummary(); buildHabitTable(); buildWheelControls(); drawWheel(); }
   if (active === 'screen-progress') { buildProgressTable(); buildQualityTable(); }
+  try {
+    const { data } = await sb.from('weeks').select('data').eq('user_id', currentUser.id).eq('week_start', weekStart).maybeSingle();
+    if (data?.data) {
+      weekData = { ...defaultWeekData(), ...data.data }; lsSet('week', weekStart, data.data);
+      if (active === 'screen-weekly')  { buildWeeklySummary(); buildHabitTable(); buildWheelControls(); drawWheel(); }
+      if (active === 'screen-progress') { buildProgressTable(); buildQualityTable(); }
+    }
+  } catch(e) {} // offline — cached data already shown
   subscribeWeekChanges();
 }
 
@@ -614,36 +663,37 @@ function subscribeConfig() {
 // ══════════════════════════════════════
 function scheduleDaySave() {
   setSyncStatus('saving');
+  lsSet('day', currentDate, dayData); // cache immediately
   clearTimeout(dayTimer);
   dayTimer = setTimeout(async () => {
+    const row = { user_id: currentUser.id, date: currentDate, data: dayData, updated_at: new Date().toISOString() };
+    if (!navigator.onLine) { queuePending({ table:'days', row, conflict:'user_id,date' }); setSyncStatus('offline'); return; }
     ignoreNext.day = true;
-    const { error } = await sb.from('days').upsert(
-      { user_id: currentUser.id, date: currentDate, data: dayData, updated_at: new Date().toISOString() },
-      { onConflict: 'user_id,date' }
-    );
-    if (error) { console.error(error); setSyncStatus('offline'); } else setSyncStatus('synced');
+    const { error } = await sb.from('days').upsert(row, { onConflict: 'user_id,date' });
+    if (error) { queuePending({ table:'days', row, conflict:'user_id,date' }); setSyncStatus('offline'); } else setSyncStatus('synced');
   }, 800);
 }
 function scheduleWeekSave() {
   setSyncStatus('saving');
+  lsSet('week', getWeekStr(), weekData); // cache immediately
   clearTimeout(weekTimer);
   weekTimer = setTimeout(async () => {
+    const row = { user_id: currentUser.id, week_start: getWeekStr(), data: weekData, updated_at: new Date().toISOString() };
+    if (!navigator.onLine) { queuePending({ table:'weeks', row, conflict:'user_id,week_start' }); setSyncStatus('offline'); return; }
     ignoreNext.week = true;
-    const { error } = await sb.from('weeks').upsert(
-      { user_id: currentUser.id, week_start: getWeekStr(), data: weekData, updated_at: new Date().toISOString() },
-      { onConflict: 'user_id,week_start' }
-    );
-    if (error) { console.error(error); setSyncStatus('offline'); } else setSyncStatus('synced');
+    const { error } = await sb.from('weeks').upsert(row, { onConflict: 'user_id,week_start' });
+    if (error) { queuePending({ table:'weeks', row, conflict:'user_id,week_start' }); setSyncStatus('offline'); } else setSyncStatus('synced');
   }, 800);
 }
 function scheduleConfigSave() {
+  lsSet('config', 'main', configData); // cache immediately
   clearTimeout(configTimer);
   configTimer = setTimeout(async () => {
+    const row = { user_id: currentUser.id, data: configData, updated_at: new Date().toISOString() };
+    if (!navigator.onLine) { queuePending({ table:'config', row, conflict:'user_id' }); return; }
     ignoreNext.config = true;
-    await sb.from('config').upsert(
-      { user_id: currentUser.id, data: configData, updated_at: new Date().toISOString() },
-      { onConflict: 'user_id' }
-    );
+    const { error } = await sb.from('config').upsert(row, { onConflict: 'user_id' });
+    if (error) queuePending({ table:'config', row, conflict:'user_id' });
   }, 800);
 }
 
@@ -760,7 +810,27 @@ function deleteTodo(i) { dayData.todos.splice(i,1); renderTodos(); scheduleDaySa
 function renderTodos() {
   const todos = dayData.todos || []; const el = document.getElementById('todoList');
   if (!todos.length) { el.innerHTML='<div style="color:var(--muted);font-size:13px;padding:8px 0">No tasks yet — add one above</div>'; return; }
-  el.innerHTML = todos.map((t,i) => `<div class="todo-item"><input type="checkbox" class="todo-cb" ${t.done?'checked':''} onchange="toggleTodo(${i})"><span class="todo-label ${t.done?'done':''}">${escHtml(t.text)}</span><button class="todo-del" onclick="deleteTodo(${i})">×</button></div>`).join('');
+  el.innerHTML = todos.map((t,i) => `<div class="todo-item" data-todo-idx="${i}"><input type="checkbox" class="todo-cb" ${t.done?'checked':''} onchange="toggleTodo(${i})"><span class="todo-label ${t.done?'done':''}" onclick="editTodo(${i})" title="Tap to edit">${escHtml(t.text)}</span><button class="todo-del" onclick="deleteTodo(${i})">×</button></div>`).join('');
+}
+
+function editTodo(i) {
+  const item = document.querySelector(`[data-todo-idx="${i}"]`);
+  if (!item) return;
+  const label = item.querySelector('.todo-label');
+  const inp = document.createElement('input');
+  inp.type = 'text';
+  inp.className = 'todo-edit-input';
+  inp.value = dayData.todos[i].text;
+  inp.onblur  = () => saveTodoEdit(i, inp.value);
+  inp.onkeydown = e => { if (e.key === 'Enter') inp.blur(); if (e.key === 'Escape') renderTodos(); };
+  label.replaceWith(inp);
+  inp.focus(); inp.select();
+}
+
+function saveTodoEdit(i, val) {
+  const text = val.trim();
+  if (text && dayData.todos[i]) { dayData.todos[i].text = text; scheduleDaySave(); }
+  renderTodos();
 }
 
 // ══════════════════════════════════════
