@@ -467,6 +467,7 @@ let allBooks = [];
 let allReflections = {};
 let kindleLibrary = [];
 let currentBookId = null;
+let _kResults = [];
 let currentReflectionQ = 'Q1';
 let saveTimers = {};
 
@@ -870,8 +871,12 @@ function onTitleInput(val) {
   } else {
     const matches=kindleLibrary.filter(b=>b.t.toLowerCase().includes(q)).slice(0,8);
     if(matches.length) {
-      results.innerHTML=matches.map(b=>`
-        <div class="kindle-result-item" onclick="selectKindleBook(${JSON.stringify(b.t)},${JSON.stringify(b.a)})">
+      _kResults=matches;
+      results.innerHTML=matches.map((b,i)=>`
+        <div class="kindle-result-item"
+          onmousedown="event.preventDefault()"
+          ontouchstart="event.preventDefault()"
+          onclick="pickKindleResult(${i})">
           <div class="kindle-result-title">${esc(b.t)}</div>
           <div class="kindle-result-author">${esc(b.a)}</div>
         </div>`).join('');
@@ -881,6 +886,10 @@ function onTitleInput(val) {
     }
     document.getElementById('saveToLibraryWrap').style.display='flex';
   }
+}
+
+function pickKindleResult(i) {
+  const b=_kResults[i]; if(b) selectKindleBook(b.t,b.a);
 }
 
 function selectKindleBook(title,author) {
