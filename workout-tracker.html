@@ -493,16 +493,30 @@ function defaultWorkout() {
 // ══════════════════════════════════════
 // AUTH
 // ══════════════════════════════════════
+function cacheUser(u) { try { localStorage.setItem('wt_offline_user', JSON.stringify({id:u.id,email:u.email})); } catch(e) {} }
+function getCachedUser() { try { const v=localStorage.getItem('wt_offline_user'); return v?JSON.parse(v):null; } catch(e) { return null; } }
+
 sb.auth.onAuthStateChange((event, session) => {
   if (session?.user) {
     currentUser = session.user;
+    cacheUser(session.user);
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     startApp();
   } else {
-    currentUser = null;
-    document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('app').style.display = 'none';
+    // If offline and we have a cached user, skip the login screen
+    const cached = getCachedUser();
+    if (cached && !navigator.onLine) {
+      currentUser = cached;
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      startApp();
+      setSyncStatus('offline');
+    } else {
+      currentUser = null;
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('app').style.display = 'none';
+    }
   }
 });
 
@@ -557,9 +571,13 @@ function buildRatingRow() {
 // LAST SESSIONS CACHE
 // ══════════════════════════════════════
 async function loadLastSessions() {
-  const { data } = await sb.from('workouts')
-    .select('date,data').eq('user_id', currentUser.id)
-    .order('date', {ascending:false}).limit(100);
+  let data;
+  try {
+    const res = await sb.from('workouts')
+      .select('date,data').eq('user_id', currentUser.id)
+      .order('date', {ascending:false}).limit(100);
+    data = res.data;
+  } catch(e) { return; }
   if (!data) return;
   const today = todayStr();
   data.filter(r => r.date !== today).forEach(row => {

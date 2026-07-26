@@ -528,17 +528,31 @@ window.addEventListener('offline', () => setSyncStatus('offline'));
 // ══════════════════════════════════════
 // AUTH
 // ══════════════════════════════════════
+function cacheUser(u) { try { localStorage.setItem('de_offline_user', JSON.stringify({id:u.id,email:u.email})); } catch(e) {} }
+function getCachedUser() { try { const v=localStorage.getItem('de_offline_user'); return v?JSON.parse(v):null; } catch(e) { return null; } }
+
 sb.auth.onAuthStateChange((event, session) => {
   if (session?.user) {
     currentUser = session.user;
+    cacheUser(session.user);
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     startApp();
   } else {
-    currentUser = null;
-    document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('app').style.display = 'none';
-    teardownListeners();
+    // If offline and we have a cached user, skip the login screen
+    const cached = getCachedUser();
+    if (cached && !navigator.onLine) {
+      currentUser = cached;
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      startApp();
+      setSyncStatus('offline');
+    } else {
+      currentUser = null;
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('app').style.display = 'none';
+      teardownListeners();
+    }
   }
 });
 
