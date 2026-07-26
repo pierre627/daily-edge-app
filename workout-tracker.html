@@ -595,12 +595,18 @@ function updateExerciseDatalist() {
 // LOAD / SAVE
 // ══════════════════════════════════════
 async function loadTodayWorkout() {
-  const { data } = await sb.from('workouts').select('data')
-    .eq('user_id', currentUser.id).eq('date', currentDate).maybeSingle();
-  if (data?.data && data.data.type) {
-    workoutData = { ...defaultWorkout(), ...data.data };
-    renderWorkout();
-  }
+  // Show cached data immediately so app works offline
+  const cached = lsGet(currentDate);
+  if (cached?.type) { workoutData = { ...defaultWorkout(), ...cached }; renderWorkout(); }
+  try {
+    const { data } = await sb.from('workouts').select('data')
+      .eq('user_id', currentUser.id).eq('date', currentDate).maybeSingle();
+    if (data?.data?.type) {
+      workoutData = { ...defaultWorkout(), ...data.data };
+      lsSet(currentDate, data.data);
+      renderWorkout();
+    }
+  } catch(e) {} // offline — cached data already shown
 }
 
 async function changeLogDay(delta) {
@@ -622,13 +628,15 @@ async function changeLogDay(delta) {
 
 function scheduleSave() {
   setSyncStatus('saving');
+  lsSet(currentDate, workoutData); // cache immediately
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async () => {
+    if (!navigator.onLine) { queuePending(currentDate, workoutData); setSyncStatus('offline'); return; }
     const { error } = await sb.from('workouts').upsert(
       { user_id: currentUser.id, date: currentDate, data: workoutData, updated_at: new Date().toISOString() },
       { onConflict: 'user_id,date' }
     );
-    if (error) { console.error(error); setSyncStatus('offline'); }
+    if (error) { queuePending(currentDate, workoutData); setSyncStatus('offline'); }
     else setSyncStatus('synced');
   }, 800);
 }
@@ -637,11 +645,18 @@ async function saveWorkoutNow() {
   captureFormFields();
   clearTimeout(saveTimer);
   setSyncStatus('saving');
+  lsSet(currentDate, workoutData); // cache immediately
+  if (!navigator.onLine) {
+    queuePending(currentDate, workoutData);
+    setSyncStatus('offline');
+    showSaveConfirm('✓ Saved locally');
+    return;
+  }
   const { error } = await sb.from('workouts').upsert(
     { user_id: currentUser.id, date: currentDate, data: workoutData, updated_at: new Date().toISOString() },
     { onConflict: 'user_id,date' }
   );
-  if (error) { setSyncStatus('offline'); alert('Save failed. Check your connection.'); }
+  if (error) { queuePending(currentDate, workoutData); setSyncStatus('offline'); showSaveConfirm('✓ Saved locally'); }
   else { setSyncStatus('synced'); showSaveConfirm(); }
 }
 
@@ -656,6 +671,43 @@ function setSyncStatus(s) {
   const dot = document.getElementById('syncDot'); if (!dot) return;
   dot.className = 'sync-dot' + (s==='saving'?' saving':s==='offline'?' offline':'');
 }
+
+// ══════════════════════════════════════
+// LOCAL CACHE (offline support)
+// ══════════════════════════════════════
+function lsKey(date) { return `wt_${currentUser?.id}_${date}`; }
+function lsGet(date) { try { const v = localStorage.getItem(lsKey(date)); return v ? JSON.parse(v) : null; } catch(e) { return null; } }
+function lsSet(date, data) { try { localStorage.setItem(lsKey(date), JSON.stringify(data)); } catch(e) {} }
+function getPending() { try { return JSON.parse(localStorage.getItem(`wt_pending_${currentUser?.id}`) || '[]'); } catch(e) { return []; } }
+function setPending(arr) { try { localStorage.setItem(`wt_pending_${currentUser?.id}`, JSON.stringify(arr)); } catch(e) {} }
+function queuePending(date, data) {
+  const p = getPending();
+  const idx = p.findIndex(x => x.date === date);
+  const op = { date, data, ts: Date.now() };
+  if (idx >= 0) p[idx] = op; else p.push(op);
+  setPending(p);
+}
+
+async function flushPendingWrites() {
+  if (!currentUser || !navigator.onLine) return;
+  const pending = getPending();
+  if (!pending.length) return;
+  const failed = [];
+  for (const op of pending) {
+    try {
+      const { error } = await sb.from('workouts').upsert(
+        { user_id: currentUser.id, date: op.date, data: op.data, updated_at: new Date().toISOString() },
+        { onConflict: 'user_id,date' }
+      );
+      if (error) failed.push(op);
+    } catch(e) { failed.push(op); }
+  }
+  setPending(failed);
+  if (!failed.length) setSyncStatus('synced');
+}
+
+window.addEventListener('online',  () => { setSyncStatus('synced'); flushPendingWrites(); });
+window.addEventListener('offline', () => setSyncStatus('offline'));
 
 function clearWorkout() {
   if (!confirm('Clear today\'s workout and start fresh?')) return;
