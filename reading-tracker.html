@@ -159,6 +159,19 @@ details.card[open]>summary{margin-bottom:12px}
 .kindle-result-item:hover,.kindle-result-item:active{background:var(--purple-pale)}
 .kindle-result-title{font-weight:600;color:var(--text)}
 .kindle-result-author{font-size:11px;color:var(--muted);margin-top:1px}
+/* ── Filter tabs ── */
+.filter-row{display:flex;gap:6px;margin-bottom:14px}
+.filter-btn{flex:1;padding:6px 4px;border-radius:20px;border:1.5px solid var(--border);background:var(--card2);color:var(--muted);font-size:11px;font-weight:700;cursor:pointer}
+.filter-btn.active{border-color:var(--purple);background:var(--purple-pale);color:var(--purple)}
+/* ── Week indicator on card ── */
+.wk-indicator{font-size:10px;font-weight:700;background:var(--gold-pale);color:var(--gold);border-radius:6px;padding:2px 7px}
+/* ── Core idea preview ── */
+.book-core{font-size:12px;color:var(--muted);margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:italic}
+/* ── Status picker popup ── */
+#statusPicker{display:none;position:fixed;z-index:400;background:var(--card);border-radius:14px;padding:8px;box-shadow:0 8px 32px rgba(0,0,0,.3);min-width:190px}
+#statusPicker.show{display:block}
+.status-pick-btn{display:block;width:100%;text-align:left;padding:10px 14px;border:none;background:none;font-size:14px;font-weight:600;cursor:pointer;border-radius:8px;color:var(--text)}
+.status-pick-btn:active{background:var(--card2)}
 </style>
 </head>
 <body>
@@ -194,6 +207,11 @@ details.card[open]>summary{margin-bottom:12px}
     <div class="sec-title">My Library</div>
     <div class="sec-sub" id="librarySub">Your reading journey</div>
     <button class="add-book-btn" onclick="openAddBook()">＋ Add Book</button>
+    <div class="filter-row">
+      <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+      <button class="filter-btn" onclick="setFilter('in-progress',this)">In Progress</button>
+      <button class="filter-btn" onclick="setFilter('completed',this)">Completed</button>
+    </div>
     <div id="bookList"></div>
   </div>
 
@@ -222,6 +240,13 @@ details.card[open]>summary{margin-bottom:12px}
     <button class="nav-btn" onclick="showScreen('reflections',this)"><span class="nav-icon">🪞</span>Reflect</button>
     <button class="nav-btn" onclick="showScreen('stats',this)"><span class="nav-icon">📊</span>Progress</button>
   </nav>
+</div>
+
+<!-- ═══ STATUS PICKER POPUP ═══ -->
+<div id="statusPicker">
+  <button class="status-pick-btn" onclick="quickStatus('not-started')">⬜ Not Started</button>
+  <button class="status-pick-btn" onclick="quickStatus('in-progress')">🟡 In Progress</button>
+  <button class="status-pick-btn" onclick="quickStatus('completed')">✅ Completed</button>
 </div>
 
 <!-- ═══ BOOK DETAIL OVERLAY ═══ -->
@@ -468,6 +493,10 @@ let allReflections = {};
 let kindleLibrary = [];
 let currentBookId = null;
 let _kResults = [];
+let currentFilter = 'all';
+let longPressTimer = null;
+let longPressBookId = null;
+let longPressTriggered = false;
 let currentReflectionQ = 'Q1';
 let saveTimers = {};
 
@@ -650,32 +679,87 @@ function saveKindleLibrary() {
 // ══════════════════════════════════════════
 // LIBRARY SCREEN
 // ══════════════════════════════════════════
+function setFilter(f, btn) {
+  currentFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderLibrary();
+}
+
+function bookCardHtml(b) {
+  // Current week indicator for in-progress books
+  let wkBadge='';
+  if((b.status||'not-started')==='in-progress') {
+    const wi=(b.weeks||[]).findIndex(w=>!w.done);
+    wkBadge=`<span class="wk-indicator">Wk ${wi===-1?4:wi+1}</span>`;
+  }
+  const corePreview=b.coreIdea?`<div class="book-core">"${esc(b.coreIdea)}"</div>`:'';
+  return `<div class="book-card status-${b.status||'not-started'}"
+    onclick="if(!longPressTriggered)openBookDetail('${b.id}');longPressTriggered=false;"
+    ontouchstart="startLongPress(event,'${b.id}')"
+    ontouchend="cancelLongPress(event)"
+    ontouchmove="cancelLongPress()">
+    <div class="book-top">
+      <div style="flex:1;min-width:0">
+        <div class="book-title">${esc(b.title||'Untitled')}</div>
+        <div class="book-author">${esc(b.author||'')}</div>
+        ${corePreview}
+      </div>
+      <span class="status-badge ${b.status||'not-started'}">${STATUS_LABEL[b.status]||'Not Started'}</span>
+    </div>
+    <div class="book-meta">
+      <span class="q-badge">${esc(b.quarter||'Q1')}</span>
+      ${b.month?`<span class="month-badge">${esc(b.month)}</span>`:''}
+      ${wkBadge}
+    </div>
+    <div class="book-progress">${(b.weeks||[]).map(w=>`<div class="week-dot${w.done?' done':''}"></div>`).join('')}</div>
+  </div>`;
+}
+
 function renderLibrary() {
   const sub=document.getElementById('librarySub');
   const total=allBooks.length, done=allBooks.filter(b=>b.status==='completed').length, ip=allBooks.filter(b=>b.status==='in-progress').length;
   if(sub) sub.textContent=total?`${done} completed · ${ip} in progress · ${total} total`:'Add your first book to start tracking.';
   const list=document.getElementById('bookList'); if(!list) return;
-  if(!total){ list.innerHTML='<div class="empty"><div class="empty-icon">📖</div>No books yet.<br>Tap <strong>+ Add Book</strong> to begin.</div>'; return; }
+  const filtered=currentFilter==='all'?allBooks:allBooks.filter(b=>b.status===currentFilter);
+  if(!filtered.length){
+    list.innerHTML=`<div class="empty"><div class="empty-icon">${allBooks.length?'🔍':'📖'}</div>${allBooks.length?'No '+STATUS_LABEL[currentFilter]+' books yet.':'No books yet.<br>Tap <strong>+ Add Book</strong> to begin.'}</div>`;
+    return;
+  }
   const byQ={};
-  allBooks.forEach(b=>{const q=b.quarter||'Q1';(byQ[q]=byQ[q]||[]).push(b);});
+  filtered.forEach(b=>{const q=b.quarter||'Q1';(byQ[q]=byQ[q]||[]).push(b);});
   list.innerHTML=['Q1','Q2','Q3','Q4'].filter(q=>byQ[q]).map(q=>{
     const books=byQ[q], theme=books[0]?.theme;
     return `<div class="quarter-group">
       <div class="quarter-header">${q}${theme?' — '+esc(theme):''}</div>
-      ${books.map(b=>`
-      <div class="book-card status-${b.status||'not-started'}" onclick="openBookDetail('${b.id}')">
-        <div class="book-top">
-          <div><div class="book-title">${esc(b.title||'Untitled')}</div><div class="book-author">${esc(b.author||'')}</div></div>
-          <span class="status-badge ${b.status||'not-started'}">${STATUS_LABEL[b.status]||'Not Started'}</span>
-        </div>
-        <div class="book-meta">
-          <span class="q-badge">${esc(b.quarter||'Q1')}</span>
-          ${b.month?`<span class="month-badge">${esc(b.month)}</span>`:''}
-        </div>
-        <div class="book-progress">${(b.weeks||[]).map(w=>`<div class="week-dot${w.done?' done':''}"></div>`).join('')}</div>
-      </div>`).join('')}
+      ${books.map(b=>bookCardHtml(b)).join('')}
     </div>`;
   }).join('');
+}
+
+// ── Long press for quick status ──
+function startLongPress(e,id) {
+  longPressBookId=id; longPressTriggered=false;
+  longPressTimer=setTimeout(()=>{
+    longPressTriggered=true;
+    const touch=e.touches[0];
+    const picker=document.getElementById('statusPicker');
+    const left=Math.max(10,Math.min(touch.clientX-10,window.innerWidth-210));
+    const top=Math.max(10,Math.min(touch.clientY-20,window.innerHeight-160));
+    picker.style.left=left+'px'; picker.style.top=top+'px';
+    picker.classList.add('show');
+    if(navigator.vibrate) navigator.vibrate(40);
+  },500);
+}
+function cancelLongPress(e) {
+  clearTimeout(longPressTimer);
+  if(longPressTriggered && e) e.preventDefault();
+}
+function quickStatus(status) {
+  const book=allBooks.find(b=>b.id===longPressBookId);
+  if(book){book.status=status;saveBook(book);renderLibrary();}
+  document.getElementById('statusPicker').classList.remove('show');
+  longPressBookId=null;
 }
 
 // ══════════════════════════════════════════
@@ -900,9 +984,10 @@ function selectKindleBook(title,author) {
   document.getElementById('newQuarter').focus();
 }
 
-// Hide dropdown when clicking elsewhere
+// Hide dropdowns when clicking elsewhere
 document.addEventListener('click', e=>{
   if(!e.target.closest('.kindle-search-wrap')) document.getElementById('kindleResults')?.classList.remove('show');
+  if(!e.target.closest('#statusPicker')&&!e.target.closest('.book-card')) document.getElementById('statusPicker')?.classList.remove('show');
 });
 
 function saveNewBook() {
