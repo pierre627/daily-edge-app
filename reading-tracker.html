@@ -155,6 +155,25 @@ textarea.m-input{color:#f5f0ff}
 /* misc */
 .empty-shelf{color:#4a2080;font-style:italic;text-align:center;padding:60px 0;font-size:16px;line-height:1.6}
 .error-bar{color:#ef4444;font-family:'JetBrains Mono',monospace;font-size:12px;margin-bottom:14px}
+
+/* ── Reading Goals card ── */
+.rg-card{background:#160f2d;border:1px solid #3b1d6e;border-radius:10px;padding:16px;margin-bottom:16px}
+.rg-grid{display:grid;grid-template-columns:1fr 1px 1fr;gap:16px;align-items:start}
+@media(max-width:440px){.rg-grid{grid-template-columns:1fr;gap:14px}}
+.rg-divider{background:#2d1b5e;align-self:stretch}
+@media(max-width:440px){.rg-divider{display:none}}
+.rg-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#6d3aad;margin-bottom:8px}
+.rg-big{font-size:26px;font-weight:600;line-height:1}
+.rg-big.danger{color:#ef4444}
+.rg-big.warn{color:#d97706}
+.rg-big.ok{color:#22c55e}
+.rg-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:#a78bfa;margin-top:4px;line-height:1.5}
+.rg-nudge{font-size:12px;color:#c4b5fd;margin-top:10px;line-height:1.5;font-style:italic;padding-top:10px;border-top:1px solid #2d1b5e}
+.rg-log-btns{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.rg-log-btn{background:#1e1540;border:1px solid #3b1d6e;color:#c4b5fd;border-radius:6px;padding:5px 13px;font-family:'JetBrains Mono',monospace;font-size:11px;cursor:pointer;transition:background .1s}
+.rg-log-btn:active,.rg-log-btn:hover{background:#2d1b5e}
+.rg-streak{margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#a78bfa;display:flex;align-items:center;gap:5px}
+.rg-goal-link{background:none;border:none;color:#6d3aad;font-family:'JetBrains Mono',monospace;font-size:9px;cursor:pointer;padding:0;text-decoration:underline}
 </style>
 </head>
 <body>
@@ -193,6 +212,7 @@ textarea.m-input{color:#f5f0ff}
 
   <!-- Shelf panel -->
   <div class="tab-panel active" id="panel-shelf">
+    <div class="rg-card" id="readingGoalsCard"></div>
     <div class="controls">
       <div class="search-wrap">
         <span class="search-ico">🔍</span>
@@ -445,6 +465,8 @@ let _discResults = [];
 let saveTimer = null;
 let activeTab = 'shelf';
 let goalTarget = parseInt(localStorage.getItem('rl_goal') || '24');
+let readingLog = [];
+let dailyGoalMinutes = parseInt(localStorage.getItem('rl_daily_goal') || '45');
 
 // ═══════════════════════════════════════════
 // UTILS
@@ -530,6 +552,7 @@ async function signIn(){
 // STARTUP
 // ═══════════════════════════════════════════
 async function startApp(){
+  try{const v=localStorage.getItem(`rl_log_${currentUser?.id}`);readingLog=v?JSON.parse(v):[];}catch(e){readingLog=[];}
   const cached=loadLocal();
   if(cached){ books=cached; render(); }
 
@@ -587,6 +610,7 @@ function showError(msg){
 function render(){
   renderStats();
   renderGoalBar();
+  renderGoalsCard();
   renderShelf();
   if(activeTab==='curriculum') renderCurriculum();
   if(activeTab==='discover') renderDiscover();
@@ -944,6 +968,107 @@ function pickAc(i){
   document.getElementById('fAuthor').value=b.a;
   document.getElementById('kindleResults')?.classList.remove('show');
   document.getElementById('fPages')?.focus();
+}
+
+// ═══════════════════════════════════════════
+// READING GOALS
+// ═══════════════════════════════════════════
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+function todayMinutes(){
+  const t=todayStr();
+  return readingLog.filter(e=>e.date===t).reduce((s,e)=>s+e.minutes,0);
+}
+
+function calcStreak(){
+  const logDates=new Set(readingLog.map(e=>e.date));
+  let streak=0, d=new Date();
+  if(!logDates.has(todayStr())) d.setDate(d.getDate()-1);
+  while(logDates.has(d.toISOString().slice(0,10))){
+    streak++; d.setDate(d.getDate()-1);
+  }
+  return streak;
+}
+
+function calcPace(){
+  const now=new Date(), yr=now.getFullYear();
+  const m=now.getMonth(), day=now.getDate();
+  const daysInMonth=new Date(yr,m+1,0).getDate();
+  const booksExpected=(m+day/daysInMonth)*2;
+  const finishedThisYear=books.filter(b=>
+    b.finishedAt&&new Date(b.finishedAt).getFullYear()===yr
+  ).length;
+  const behind=Math.max(0,Math.round(booksExpected-finishedThisYear));
+  return {behind,finishedThisYear,booksExpected};
+}
+
+function logMinutes(n){
+  if(n==='custom'){
+    const v=prompt('Minutes read:','');
+    const p=parseInt(v); if(!p||p<1) return; n=p;
+  }
+  readingLog.push({date:todayStr(),minutes:n});
+  try{localStorage.setItem(`rl_log_${currentUser?.id}`,JSON.stringify(readingLog));}catch(e){}
+  renderGoalsCard();
+}
+
+function setDailyGoal(){
+  const v=prompt('Daily reading goal (minutes):',dailyGoalMinutes);
+  if(v===null) return;
+  const n=parseInt(v); if(!n||n<1) return;
+  dailyGoalMinutes=n;
+  localStorage.setItem('rl_daily_goal',String(n));
+  renderGoalsCard();
+}
+
+function renderGoalsCard(){
+  const el=document.getElementById('readingGoalsCard'); if(!el) return;
+  const {behind,finishedThisYear,booksExpected}=calcPace();
+  const streak=calcStreak();
+  const todayMin=todayMinutes();
+  const goalMet=todayMin>=dailyGoalMinutes;
+
+  let paceClass='ok', paceLabel='On Pace';
+  let nudge='You\'re on pace — keep the momentum going.';
+  if(behind>=6){
+    paceClass='danger'; paceLabel=`${behind} books behind`;
+    nudge=`Aim for 90+ min/day this month to close the gap. Every session counts.`;
+  } else if(behind>=3){
+    paceClass='danger'; paceLabel=`${behind} books behind`;
+    nudge=`60 min/day will get you back on track. Start with today's session.`;
+  } else if(behind>=1){
+    paceClass='warn'; paceLabel=`${behind} book${behind>1?'s':''} behind`;
+    nudge=`30 extra minutes a day will close the gap by month's end.`;
+  }
+
+  const streakHtml=streak>0
+    ?`<div class="rg-streak">🔥 <strong>${streak}-day streak</strong> — don't break it</div>`
+    :`<div class="rg-streak">No streak yet — log today's session to start one</div>`;
+
+  el.innerHTML=`
+    <div class="rg-grid">
+      <div>
+        <div class="rg-lbl">2026 Pace</div>
+        <div class="rg-big ${paceClass}">${paceLabel}</div>
+        <div class="rg-sub">${finishedThisYear} of ${Math.round(booksExpected)} books expected by today</div>
+        <div class="rg-nudge">${nudge}</div>
+      </div>
+      <div class="rg-divider"></div>
+      <div>
+        <div class="rg-lbl">Today's Reading</div>
+        <div class="rg-big ${goalMet?'ok':'warn'}">${todayMin} min${goalMet?' ✓':''}</div>
+        <div class="rg-sub">Goal: ${dailyGoalMinutes} min/day
+          &nbsp;<button class="rg-goal-link" onclick="setDailyGoal()">change</button>
+        </div>
+        <div class="rg-log-btns">
+          <button class="rg-log-btn" onclick="logMinutes(15)">+15</button>
+          <button class="rg-log-btn" onclick="logMinutes(30)">+30</button>
+          <button class="rg-log-btn" onclick="logMinutes(60)">+60</button>
+          <button class="rg-log-btn" onclick="logMinutes('custom')">+?</button>
+        </div>
+        ${streakHtml}
+      </div>
+    </div>`;
 }
 
 document.addEventListener('click',e=>{
