@@ -25,6 +25,8 @@ body{min-height:100vh;background:#f1f5f9;padding:24px 16px 88px;font-family:'Sou
 .sync-dot{width:7px;height:7px;border-radius:50%;background:#d97706;opacity:0;transition:opacity .3s}
 .sync-dot.show{opacity:1}
 .sync-dot.offline{background:#ef4444;opacity:1}
+.signout-btn{background:none;border:1px solid #e2e8f0;border-radius:6px;padding:4px 10px;font-size:11px;color:#94a3b8;cursor:pointer;font-family:'JetBrains Mono',monospace;letter-spacing:.3px}
+.signout-btn:hover{border-color:#dc2626;color:#dc2626}
 .app-sub{font-family:'JetBrains Mono',monospace;font-size:11px;color:#94a3b8;margin-bottom:18px;letter-spacing:.3px}
 
 /* ── Bottom nav ── */
@@ -201,7 +203,10 @@ body{min-height:100vh;background:#f1f5f9;padding:24px 16px 88px;font-family:'Sou
 <div id="app">
   <div class="app-header">
     <h1 class="app-title">The Learning Edge</h1>
-    <div class="sync-dot" id="syncDot"></div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="sync-dot" id="syncDot"></div>
+      <button class="signout-btn" onclick="signOut()">Sign out</button>
+    </div>
   </div>
   <div class="app-sub" id="appSub">Loading…</div>
 
@@ -1284,6 +1289,14 @@ sb.auth.onAuthStateChange((event,session)=>{
 async function signIn(){
   await sb.auth.signInWithOAuth({provider:'google',
     options:{redirectTo:location.href.split('#')[0].split('?')[0]}});
+}
+
+async function signOut(){
+  localStorage.removeItem('le_user');
+  await sb.auth.signOut();
+  currentUser=null;
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('app').style.display='none';
 }
 
 // ═══════════════════════════════════════════
