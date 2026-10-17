@@ -152,6 +152,18 @@ body{min-height:100vh;background:#f1f5f9;padding:24px 16px 88px;font-family:'Sou
 .modal-log-btn:active{background:#e2e8f0}
 .modal-time-logged{font-family:'JetBrains Mono',monospace;font-size:10px;color:#d97706}
 .save-btn{width:100%;padding:11px 0;background:#7c3aed;color:#fff;border:none;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.6px;text-transform:uppercase;cursor:pointer}
+
+/* ── Lesson content ── */
+.m-lesson-content{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px 16px;margin-bottom:16px;font-size:13px;color:#334155;line-height:1.75}
+.m-lesson-content h4{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#7c3aed;margin:14px 0 5px}
+.m-lesson-content h4:first-child{margin-top:0}
+.m-lesson-content .ex{background:#ede9fe;border-left:3px solid #7c3aed;border-radius:0 6px 6px 0;padding:8px 12px;margin:8px 0;font-family:'JetBrains Mono',monospace;font-size:11px;color:#4c1d95;line-height:1.6}
+.m-lesson-content .rule{display:block;background:#fef3c7;border-left:3px solid #d97706;border-radius:0 6px 6px 0;padding:7px 12px;margin:8px 0;font-size:12px;font-weight:600;color:#92400e}
+.m-lesson-content ul{padding-left:18px;margin:4px 0}
+.m-lesson-content li{margin:4px 0}
+.m-lesson-content strong{color:#1e293b}
+.m-lesson-content .check{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:10px 12px;margin-top:12px;font-size:12px;color:#166534}
+.m-lesson-content .check strong{color:#166534}
 </style>
 </head>
 <body>
@@ -230,73 +242,858 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 const TRACKS = [
   {
     id:'photography', title:'Photography', emoji:'📷', accent:'#7c3aed', accentBg:'#ede9fe',
-    desc:'From exposure basics to professional technique and creative vision',
+    desc:'Fundamentals, Fujifilm X-E5, street photography, and landscape mastery',
     modules:[
-      { id:'ph-m1', title:'Camera Foundations', lessons:[
-        {id:'ph-l1',  title:'The Exposure Triangle',         desc:'Master aperture, shutter speed, and ISO — the three pillars of every image.', min:45},
-        {id:'ph-l2',  title:'Camera Modes Explained',        desc:'When to shoot Manual, Aperture Priority, Shutter Priority, and Program.', min:30},
-        {id:'ph-l3',  title:'Autofocus Systems',             desc:'Single-point, zone, and tracking AF modes for sharp results every time.', min:30},
-        {id:'ph-l4',  title:'White Balance & Color Temp',    desc:'Control color temperature for natural, warm, or cinematic looks.', min:25},
+      { id:'ph-m1', title:'Photography Fundamentals', lessons:[
+        {id:'ph-l1', title:'The Exposure Triangle', desc:'Aperture, shutter speed, and ISO work together to create every image. Change one and you must compensate with another.', min:45,
+         content:`<h4>The Three Variables</h4>
+<strong>Aperture (f-stop)</strong> — Controls how wide the lens opens. Measured in f-stops.<br>
+<ul>
+<li>Wide aperture (f/1.8): More light in, shallow depth of field (blurry background)</li>
+<li>Narrow aperture (f/16): Less light in, deep depth of field (everything sharp)</li>
+<li>Counter-intuitive: <em>lower</em> f-number = <em>wider</em> opening</li>
+</ul>
+<strong>Shutter Speed</strong> — How long the sensor is exposed to light.<br>
+<ul>
+<li>Fast (1/1000s): Freezes motion. Less light.</li>
+<li>Slow (1/30s): Motion blur. More light. Requires steady hands or a tripod.</li>
+</ul>
+<strong>ISO</strong> — Sensor sensitivity to light.<br>
+<ul>
+<li>Low ISO (100–400): Clean image, less sensitivity</li>
+<li>High ISO (3200+): Brighter in dark conditions, but adds grain/noise</li>
+</ul>
+<h4>The Relationship</h4>
+<div class="ex">You're shooting indoors. It's dark. You can:<br>
+(a) Open aperture wider → shallower focus<br>
+(b) Slow shutter speed → risk camera shake<br>
+(c) Raise ISO → introduce grain<br>
+Most situations require balancing all three.</div>
+<h4>Stop Increments</h4>
+Doubling or halving any variable = one "stop" of light. Going from f/2.8 to f/4 halves the light. Going from 1/125 to 1/250 halves the light. One stop is one stop — they're interchangeable in terms of exposure.
+<span class="rule">Rule: Expose for the subject. Then decide which variable's side effect you can live with (blur, grain, or depth of field).</span>
+<div class="check"><strong>Quiz:</strong> You're shooting a moving dog at f/2.8, 1/60s, ISO 400. The image is blurry. What's the most likely fix — and what trade-off does it create?<br><br>
+<em>Answer: Increase shutter speed to 1/500s or faster to freeze motion. To maintain exposure, either open aperture (if possible) or raise ISO.</em></div>
+<div class="check"><strong>Project:</strong> Find a static subject. Shoot it three times with identical exposure (same brightness) using three different combinations of aperture, shutter, and ISO. Notice how the look changes even when the exposure is the same.</div>`
+        },
+        {id:'ph-l2', title:'Camera Modes Explained', desc:'When to use Manual, Aperture Priority, Shutter Priority, and Program — and why the mode matters less than the habit.', min:30,
+         content:`<h4>The Four Main Modes</h4>
+<strong>Manual (M)</strong> — You set aperture, shutter, and ISO. Full control, full responsibility. Best when: light is consistent and you know exactly what you want.
+<br><br>
+<strong>Aperture Priority (A or Av)</strong> — You set aperture and ISO, camera chooses shutter. Best when: depth of field matters most (portraits, street, architecture). Most-used mode among experienced photographers.
+<br><br>
+<strong>Shutter Priority (S or Tv)</strong> — You set shutter and ISO, camera chooses aperture. Best when: freezing or blurring motion is the priority (sports, waterfalls, cars).
+<br><br>
+<strong>Program (P)</strong> — Camera chooses both aperture and shutter. You can shift the pair. Best when: you want a starting point in unfamiliar light and can adjust from there.
+<h4>For Fujifilm X-E5</h4>
+The X-E5 has physical aperture rings on lenses and a shutter speed dial on top. When you set the aperture ring to "A" and the shutter to "A," you're in Program. Set one to a value and the other to "A" for semi-auto modes.
+<div class="ex">Aperture ring on f/2.0, shutter dial on A → Aperture Priority<br>
+Aperture ring on A, shutter dial on 1/500 → Shutter Priority<br>
+Both on specific values → Manual</div>
+<span class="rule">Start with Aperture Priority. It gives you control over the most impactful variable (depth of field) while handling the rest automatically. Switch to Manual when you need to lock everything down.</span>
+<div class="check"><strong>Quiz:</strong> You're shooting a fountain and want the water to look silky smooth. Which mode and approximate shutter speed would you choose?<br><br>
+<em>Answer: Shutter Priority at 1/4s to 1s. Use a tripod. Lower ISO to avoid overexposure with the slow shutter.</em></div>
+<div class="check"><strong>Project:</strong> Shoot the same scene 4 times — once in each mode — and compare how the camera handles changing light. Notice when the camera's automatic choices match what you wanted and when they don't.</div>`
+        },
+        {id:'ph-l3', title:'Autofocus Systems & Fujifilm AF', desc:'Understanding AF modes means your camera hits focus when and where you need it. Missing focus is almost always a mode choice, not a camera limitation.', min:30,
+         content:`<h4>AF Modes (When to Lock Focus)</h4>
+<strong>AF-S (Single)</strong> — Locks focus when you half-press the shutter. Use for static subjects. This is the default and most reliable mode.
+<br><br>
+<strong>AF-C (Continuous)</strong> — Tracks a moving subject as long as you hold the shutter half-pressed. Use for moving subjects (people walking, bikes, birds).
+<br><br>
+<strong>MF (Manual Focus)</strong> — You focus manually using the lens ring. Use for macro, astrophotography, or when AF can't find the target.
+<h4>AF Zone Modes (Where to Focus)</h4>
+<ul>
+<li><strong>Single point:</strong> You choose exactly where the camera focuses. Most precise.</li>
+<li><strong>Zone:</strong> A cluster of AF points. Good for moving subjects you can roughly predict.</li>
+<li><strong>Wide/All:</strong> Camera chooses. Fast and convenient, but can lock onto the wrong subject.</li>
+</ul>
+<h4>Fujifilm X-E5 Specifics</h4>
+<ul>
+<li>Face/Eye Detection AF works excellently for people — turn it on when shooting portraits or street</li>
+<li>Subject tracking: Select a subject and the camera follows it across the frame</li>
+<li>Pre-AF: Camera continuously focuses even when you're not pressing the shutter — helps in AF-C</li>
+</ul>
+<span class="rule">For street photography: AF-S + single point, placed on the subject's eye. For moving subjects: AF-C + zone. For landscapes: MF or AF-S at the hyperfocal distance.</span>
+<div class="check"><strong>Quiz:</strong> You're shooting a child running toward you. Which AF mode and zone setting should you use?<br><br>
+<em>Answer: AF-C (continuous), Zone mode or wide with subject tracking. Enable face/eye detection if available.</em></div>
+<div class="check"><strong>Project:</strong> Photograph a moving subject (a person walking, a car passing) using AF-S vs. AF-C. Compare hit rate and observe when continuous tracking is worth it.</div>`
+        },
+        {id:'ph-l4', title:'White Balance & Color Temperature', desc:'White balance controls the warmth or coolness of your image. Shooting in the right white balance avoids hours of correction in post.', min:25,
+         content:`<h4>What Is White Balance?</h4>
+Different light sources emit different colors of light. Daylight is blue-white. Tungsten is orange. Fluorescent is green-tinted. White balance tells the camera (or your edit software) what "white" looks like in that light, so it can correct everything else.
+<h4>Color Temperature Scale</h4>
+<div class="ex">2000K — Candlelight (very warm, orange)<br>
+3200K — Tungsten/incandescent bulbs<br>
+5500K — Daylight (neutral)<br>
+6500K — Overcast sky (slightly cool, blue)<br>
+10000K — Clear blue sky (very cool)</div>
+<h4>Presets on the X-E5</h4>
+<ul>
+<li><strong>Auto (AWB):</strong> Camera guesses. Usually good, but can shift between shots in mixed light.</li>
+<li><strong>Daylight/Sunny:</strong> Accurate for direct sunlight at midday</li>
+<li><strong>Shade:</strong> Warms up the image to compensate for blue shadow light</li>
+<li><strong>Cloudy:</strong> Slight warming</li>
+<li><strong>Fluorescent / Tungsten:</strong> Corrects artificial light sources</li>
+<li><strong>Custom (Kelvin):</strong> Set a specific temperature value — most consistent option</li>
+</ul>
+<h4>Fujifilm Tip</h4>
+Fujifilm's film simulations (especially Velvia and Classic Chrome) interact with white balance. A warmer WB on Velvia intensifies the effect. Experiment with WB as a creative tool, not just a correction.
+<span class="rule">If shooting RAW, white balance can be changed in post without quality loss. If shooting JPEG (common on X-E5 for Fuji colors), get it right in camera.</span>
+<div class="check"><strong>Quiz:</strong> You're shooting indoors under warm tungsten light. Your images look very orange. What WB preset should you try?<br><br>
+<em>Answer: Tungsten/Incandescent preset, or set Kelvin manually to ~3200K.</em></div>
+<div class="check"><strong>Project:</strong> Photograph the same scene at three different white balance settings (Auto, Daylight, Shade). Notice how the mood shifts even though the subject is identical.</div>`
+        },
       ]},
-      { id:'ph-m2', title:'Composition & Vision', lessons:[
-        {id:'ph-l5',  title:'Rule of Thirds & Grids',        desc:'Place your subject for maximum visual impact — and when to break the rule.', min:30},
-        {id:'ph-l6',  title:'Leading Lines & Framing',       desc:'Draw the eye through the frame using natural geometry and context.', min:35},
-        {id:'ph-l7',  title:'Depth of Field as a Tool',      desc:'Separate subject from background with intention and purpose.', min:40},
-        {id:'ph-l8',  title:'Light Direction & Quality',     desc:'Hard vs. soft light, directionality, and how light sculpts the subject.', min:35},
+      { id:'ph-m2', title:'Fujifilm X-E5 Mastery', lessons:[
+        {id:'ph-l5', title:'Film Simulations — Fuji\'s Secret Weapon', desc:'Fujifilm\'s film simulations are the main reason people buy X-series cameras. Learn what each does and when to use it.', min:40,
+         content:`<h4>Why Film Simulations Matter</h4>
+Fujifilm engineers recreated the look of classic film stocks inside the camera's processing engine. Unlike generic "filters," these are scientifically modeled color science that produce camera-ready JPEGs worth keeping.
+<h4>The Key Simulations</h4>
+<strong>Provia/Standard</strong> — Balanced, neutral. Good starting point. Use when you're unsure.
+<br><br>
+<strong>Velvia</strong> — High contrast, saturated, vivid colors. Colors pop aggressively. Iconic for landscapes with greens, blues, and reds. Can be too much for skin tones.
+<br><br>
+<strong>Astia/Soft</strong> — Gentle contrast, soft skin tones, slightly warm. Best for portraits and people.
+<br><br>
+<strong>Classic Chrome</strong> — Muted, desaturated, faded highlights. Cinematic, documentary feel. Excellent for street photography. One of the most popular simulations.
+<br><br>
+<strong>Classic Neg</strong> — Even more muted than Classic Chrome. Shadows lift slightly. Film-negative aesthetic. Street and travel.
+<br><br>
+<strong>Eterna/Cinema</strong> — Very flat, desaturated, low contrast. Designed for video but creates a cool, editorial look in stills.
+<br><br>
+<strong>Acros</strong> — Fuji's black-and-white simulation. Rich tonal range, sharp grain. Far better than desaturating in post. Shoot in Acros and see the world in black and white.
+<h4>Customizing Simulations</h4>
+Each simulation can be adjusted: Highlight, Shadow, Color, Sharpness, Noise Reduction, Grain. Small adjustments make big differences. Save up to 7 custom recipes as C1–C7.
+<span class="rule">Don't just pick a simulation — customize it. A slightly reduced highlight, +1 shadow, and grain at medium-strong transforms Classic Chrome into a signature look.</span>
+<div class="check"><strong>Quiz:</strong> You're shooting golden hour in a forest. Which simulation would emphasize the warm greens and golden light most intensely?<br><br>
+<em>Answer: Velvia. It saturates greens and warms reds/yellows aggressively. Be careful — it can clip highlights. Reduce Highlight tone to -1.</em></div>
+<div class="check"><strong>Project:</strong> Shoot one scene in 5 different film simulations without changing any other settings. Export all 5. Pick your favorite and identify what it is about the color rendering that appeals to you.</div>`
+        },
+        {id:'ph-l6', title:'Physical Controls and the X-E5 Layout', desc:'The X-E5 is designed to be operated by feel, not menus. Understanding the physical controls makes you faster and more present while shooting.', min:30,
+         content:`<h4>The X-E5 Control Philosophy</h4>
+Fujifilm designed the X-series to feel like a classic rangefinder. The goal is to change settings without taking your eye from the viewfinder — or your mind from the scene.
+<h4>Key Controls</h4>
+<strong>Shutter Speed Dial (top right)</strong> — Physical dial from T (time) through 1/8000s. "A" position enables auto shutter. Pull up and rotate for ISO.
+<br><br>
+<strong>Aperture Ring (on lens)</strong> — Rotate to set aperture. "A" position enables auto aperture. This is why Fuji lenses feel different — the aperture is <em>on the lens</em>, not in a body dial.
+<br><br>
+<strong>Exposure Compensation Dial (top left)</strong> — ±3 stops in 1/3 increments. The most-used dial on any X-series camera. Get comfortable reaching for it without looking.
+<br><br>
+<strong>Command Dial (rear)</strong> — In Manual mode, controls ISO. In other modes, controls the non-automatic variable.
+<br><br>
+<strong>Focus Lever (rear right)</strong> — Moves the AF point around the frame in real time. Faster than touchscreen in most situations.
+<h4>Custom Buttons (Q button and Fn buttons)</h4>
+Program the Q menu and Fn buttons for your most-used settings. Recommended: Film Simulation, White Balance, AF Mode, Self-Timer, and ND Filter (if built-in).
+<span class="rule">Learn to set aperture, shutter, and exposure compensation without looking at the camera. That muscle memory is what separates a photographer who reacts from one who misses the shot.</span>
+<div class="check"><strong>Project:</strong> Practice the "blind drill" — with the camera off, close your eyes and set a specific exposure (e.g., f/2.8, 1/500, +0.7EV) using only the physical controls. Repeat until it takes under 5 seconds.</div>`
+        },
+        {id:'ph-l7', title:'JPEG vs. RAW on the X-E5', desc:'The X-E5\'s JPEGs are exceptional. Understanding when to shoot each format changes your entire workflow.', min:25,
+         content:`<h4>The Core Difference</h4>
+<strong>RAW</strong> — Unprocessed sensor data. Maximum flexibility in post. White balance, exposure, and color can be changed non-destructively. File is large (~25-40MB). Requires editing software.
+<br><br>
+<strong>JPEG</strong> — Camera-processed image. Film simulation, white balance, and tone curves are baked in. Smaller file (~8-15MB). Ready to share immediately. Less editing latitude.
+<h4>Why Fujifilm JPEGs Are Different</h4>
+Most camera manufacturers' JPEGs are generic. Fujifilm JPEGs are the film simulations — and they're good enough that many professionals shoot JPEG-only on X-series. The color science is the product.
+<h4>When to Shoot RAW</h4>
+<ul>
+<li>Challenging exposure situations (very dark, very bright, mixed light)</li>
+<li>When you want to change the film simulation/color look later</li>
+<li>Commercial or paid work where the client needs maximum flexibility</li>
+</ul>
+<h4>When to Shoot JPEG</h4>
+<ul>
+<li>Street photography — fast, light, camera-ready files</li>
+<li>Travel — when you've dialed in your film recipe</li>
+<li>When you trust your in-camera settings and want to minimize post-processing</li>
+</ul>
+<h4>RAW+JPEG</h4>
+Shoot both simultaneously. More storage, but you get the JPEG for quick review/sharing and the RAW as insurance.
+<span class="rule">If you've spent time dialing in your film simulation recipe, shoot JPEG. The point of the X-E5 is beautiful out-of-camera files. Don't negate that by always shooting RAW.</span>
+<div class="check"><strong>Quiz:</strong> You're shooting a documentary project on the street. Light is variable — sometimes harsh sun, sometimes deep shade. RAW, JPEG, or both — and why?<br><br>
+<em>Answer: RAW or RAW+JPEG. Variable, unpredictable light means you may need to recover exposure or shift white balance. Having the RAW gives you that option.</em></div>`
+        },
+        {id:'ph-l8', title:'Custom Recipes and In-Camera JPEG Workflow', desc:'Building a personal recipe library turns the X-E5 into a camera that produces your look straight from the card.', min:35,
+         content:`<h4>What a Recipe Is</h4>
+A recipe is a saved combination of: Film Simulation + White Balance + Highlight Tone + Shadow Tone + Color + Sharpness + Noise Reduction + Grain. The X-E5 stores up to 7 as C1–C7 on the drive dial.
+<h4>Building Your First Recipe</h4>
+Start with Classic Chrome as the base:
+<div class="ex">Film Simulation: Classic Chrome<br>
+White Balance: Daylight (5500K) or Shade for warmth<br>
+Highlight Tone: -1 (protect highlights)<br>
+Shadow Tone: 0 or +1 (lift shadows slightly for film feel)<br>
+Color: -1 or -2 (mute the saturation for that faded film look)<br>
+Sharpness: 0 or -1<br>
+Noise Reduction: -4 (Fuji's NR is heavy — pull it back)<br>
+Grain: Medium-Strong, Small</div>
+<h4>Recipe Resources</h4>
+Fuji X Weekly (fujixweekly.com) is the best free library of user-created recipes. Hundreds of recipes with before/after examples, searchable by film simulation.
+<h4>The Workflow</h4>
+<ol style="padding-left:18px;margin:6px 0">
+<li>Dial in 3–5 recipes for your most common shooting situations</li>
+<li>Assign each to C1–C5 on the drive dial</li>
+<li>Before a shoot, select the recipe for that type of light and subject</li>
+<li>Shoot JPEG. Review on the back of the camera. Adjust recipe if needed.</li>
+<li>Import to phone/computer for final select and minimal editing</li>
+</ol>
+<span class="rule">A recipe is a commitment to a visual identity. The best photographers aren't trying every simulation every day — they've found 2–3 looks and they own them.</span>
+<div class="check"><strong>Project:</strong> Create your first custom recipe. Shoot 20 images with it in one day. Don't touch it for a week. Come back and evaluate: does this look represent who you want to be as a photographer?</div>`
+        },
       ]},
-      { id:'ph-m3', title:'Natural Light Mastery', lessons:[
-        {id:'ph-l9',  title:'Golden Hour & Blue Hour',       desc:'Shoot in the magic hours when light transforms everything it touches.', min:30},
-        {id:'ph-l10', title:'Overcast & Harsh Midday Light', desc:'Turn any lighting condition into a creative advantage.', min:35},
-        {id:'ph-l11', title:'Window Light for Portraits',    desc:'Professional portrait results with zero equipment.', min:30},
-        {id:'ph-l12', title:'Chasing Light: The Mindset',   desc:'How professionals plan shoots around light, not location.', min:25},
+      { id:'ph-m3', title:'Street Photography', lessons:[
+        {id:'ph-l9', title:'The Mindset and Ethics of Street Photography', desc:'Great street photography begins before you pick up the camera. The approach, the intention, and how you treat people determines everything else.', min:30,
+         content:`<h4>What Street Photography Is</h4>
+Street photography is the candid documentation of public life — human moments, interaction, emotion, and environment in uncontrolled settings. It is not about sneaking photos of strangers. It is about being present and perceptive.
+<h4>The Legal Basics</h4>
+<ul>
+<li>In most countries, photographing people in public spaces is legal</li>
+<li>Publishing images commercially requires a model release</li>
+<li>Some countries (Germany, France) have stricter personality rights — know your local laws</li>
+<li>"No photography" signs on private property (shopping malls, train stations that are private) should be respected</li>
+</ul>
+<h4>The Ethics</h4>
+Legality and ethics aren't the same thing. Ask yourself:
+<ul>
+<li>Would I be comfortable showing this person the photo?</li>
+<li>Am I capturing their dignity or exploiting their vulnerability?</li>
+<li>Is this photo about them, or about my curiosity at their expense?</li>
+</ul>
+<h4>The Approach</h4>
+<strong>Be present, not predatory.</strong> Walk slowly. Make eye contact. Smile. Most people who notice you being photographed don't mind if you carry yourself with warmth. If someone objects, lower your camera and move on. Never argue.
+<h4>The Mindset Shift</h4>
+The most common mistake: thinking you need permission to be in public with a camera. The second most common: hesitating at the decisive moment. Hesitation costs you the shot and gains you nothing.
+<span class="rule">The best street photographers are invisible because they're comfortable, not because they're hiding. Comfort comes from knowing your camera, your settings, and why you're there.</span>
+<div class="check"><strong>Project:</strong> Spend 1 hour on a busy street with your camera. Don't take a single photo. Just observe — light, movement, expressions, moments. Then go back the next day and shoot.</div>`
+        },
+        {id:'ph-l10', title:'Street Settings and the X-E5 for Street', desc:'Street photography punishes hesitation. The right settings let you react in a fraction of a second without thinking about the camera.', min:30,
+         content:`<h4>The Street Settings Formula</h4>
+Street photography has one enemy: missed focus and motion blur at the wrong moment. Set up to eliminate both.
+<div class="ex">Aperture: f/5.6 – f/8 (deep depth of field — more of the scene is in focus)<br>
+Shutter: 1/500s or faster (freezes motion and camera shake)<br>
+ISO: Auto, max 6400 (let the camera handle exposure)<br>
+AF Mode: AF-S with Face Detection, or zone AF<br>
+AF Point: Center or small zone</div>
+<h4>Zone Focusing</h4>
+Set your lens to f/8, focus to ~3 meters, and at that aperture everything from ~2m to 5m is in focus. You don't need to focus at all — just compose and shoot. This is how street photography was done for decades with manual focus cameras.
+<h4>Fujifilm X-E5 Street Setup</h4>
+<ul>
+<li>Film Simulation: Classic Chrome or Classic Neg for the documentary feel</li>
+<li>Set exposure compensation dial to -1/3 to -2/3 for slightly moody exposure</li>
+<li>Silent shutter / electronic shutter: reduces camera noise for discreet shooting</li>
+<li>Shoot from the hip: practice framing without raising the camera for candid moments</li>
+</ul>
+<h4>Lens Choice</h4>
+The 23mm f/2 (35mm equivalent) is the classic street lens on Fuji. It's wide enough to include context, fast enough for low light, and small enough to be unintimidating. The 35mm f/2 (50mm equivalent) is more intimate.
+<span class="rule">Preset everything. The best street shot is the one you didn't have to think about technically. Your job in the moment is seeing — the camera should handle everything else.</span>
+<div class="check"><strong>Project:</strong> Shoot a 1-hour "street session" using only zone focusing at f/8, 3m. No chimping (checking the screen). Shoot 50+ frames and review only at home. Notice how your shooting changes when you're not checking results.</div>`
+        },
+        {id:'ph-l11', title:'Composition on the Street', desc:'Composition in street photography happens in split seconds. Training your eye to see geometry, layers, and light means your instincts do the work.', min:35,
+         content:`<h4>Key Compositional Principles for Street</h4>
+<strong>Background first</strong> — Find an interesting background (a mural, a shadow pattern, a shaft of light) and wait for a subject to enter it. This is how many of the iconic street shots work.
+<br><br>
+<strong>Leading lines</strong> — Streets, alleys, fences, and staircases lead the eye. Position yourself so lines converge toward your subject.
+<br><br>
+<strong>Layers</strong> — Foreground, midground, background. A strong street photo often has all three telling different stories simultaneously.
+<br><br>
+<strong>Shadow and light</strong> — Harsh midday light creates dramatic shadows that become compositional elements. Pools of light in dark doorways, long shadows stretching across pavement.
+<br><br>
+<strong>The decisive moment</strong> — Henri Cartier-Bresson's principle: the instant when form, content, and geometry align. You can't plan it, but you can position yourself where it's most likely to happen.
+<h4>The Frame Within a Frame</h4>
+Use doorways, windows, arches, and gaps to frame your subject. It creates depth and context simultaneously.
+<h4>Black and White Street</h4>
+Shoot in Acros. Color can distract from the emotional content of a street image. Black and white emphasizes form, texture, light, and expression — the things that make street photographs last.
+<span class="rule">Composition on the street is 90% positioning and 10% timing. Get yourself to the right place — the moment will come to you.</span>
+<div class="check"><strong>Project:</strong> Spend a session shooting only in black and white (Acros simulation). Look only for light, shadow, and geometry — deliberately ignore color subjects. Review and identify your 3 strongest frames.</div>`
+        },
+        {id:'ph-l12', title:'Editing Street Photography', desc:'The edit is where street photography gets its final voice. Less is almost always more — the best street photos need minimal intervention.', min:25,
+         content:`<h4>The Street Editing Philosophy</h4>
+Street photography's power comes from authenticity. Heavy editing undermines that. The goal is to enhance what was already there — not manufacture a mood that wasn't.
+<h4>The Minimal Edit Workflow</h4>
+<ol style="padding-left:18px;margin:6px 0">
+<li><strong>Cull ruthlessly</strong> — shoot 100, keep 5. The selection is the edit.</li>
+<li><strong>Exposure:</strong> Slight lift or lower to taste. Protect highlights, retain shadow detail.</li>
+<li><strong>Contrast:</strong> Medium-high for black and white. Moderate for color.</li>
+<li><strong>Clarity/Texture:</strong> Small positive value adds grit and texture — suits the street aesthetic</li>
+<li><strong>Crop:</strong> Only if the composition genuinely improves. Never crop to fix a bad frame.</li>
+</ol>
+<h4>Color Grading for Street</h4>
+Classic Chrome from the X-E5 already does most of the work. If editing in Lightroom:
+<div class="ex">Fade the highlights (pull whites down slightly)<br>
+Lift the blacks slightly (like a faded film print)<br>
+Desaturate slightly or pull specific colors (oranges/reds for skin)<br>
+Add a slight warm split tone in shadows</div>
+<h4>When to Convert to Black and White</h4>
+Convert if: the color is distracting, the light and shadow contrast is strong, the emotion is in the expression rather than the environment.
+<span class="rule">The best street editors can describe in one sentence what the photo is about — and then they delete anything in the edit that doesn't serve that sentence.</span>
+<div class="check"><strong>Project:</strong> From your last street session, cull down to 10 images. Edit them with a maximum of 5 slider adjustments each. Export and post your top 3 somewhere — a private folder, a journal, or Instagram.</div>`
+        },
       ]},
-      { id:'ph-m4', title:'Post-Processing', lessons:[
-        {id:'ph-l13', title:'Lightroom Import & Organization', desc:'Build a workflow that keeps your library searchable and manageable.', min:40},
-        {id:'ph-l14', title:'Exposure & Tone Adjustments',    desc:'Recover highlights, lift shadows, and find the perfect tonal balance.', min:45},
-        {id:'ph-l15', title:'Color Grading Fundamentals',     desc:'Create a consistent mood and visual identity across your portfolio.', min:50},
-        {id:'ph-l16', title:'Export for Social & Print',      desc:'The right settings for Instagram, web, and large-format prints.', min:25},
+      { id:'ph-m4', title:'Landscape Photography', lessons:[
+        {id:'ph-l13', title:'Planning a Landscape Shoot', desc:'The best landscape photographs are planned, not stumbled upon. Light, location, and weather research separate deliberate work from luck.', min:35,
+         content:`<h4>The Planning Stack</h4>
+<strong>Location scouting</strong> — Google Maps satellite view, Instagram geotags, and apps like The Photographer's Ephemeris (TPE) or PhotoPills show you what a location looks like and when the light will be ideal.
+<br><br>
+<strong>Golden and blue hour timing</strong> — The sun rises and sets at a different angle every day of the year. TPE and PhotoPills show you exactly where the sun will rise/set on your chosen date, at your chosen location, and how the light will fall on your subject.
+<br><br>
+<strong>Weather</strong> — Clear skies are boring for landscapes. Dramatic clouds, fog, mist, and post-storm light create atmosphere. Apps: Windy, Clear Outside, Weather Underground for detailed conditions.
+<br><br>
+<strong>Tide charts</strong> — For coastal work, tide timing affects what's accessible and what reflections/patterns appear.
+<h4>Tools</h4>
+<ul>
+<li><strong>PhotoPills:</strong> Sun/moon position, AR overlay on your camera view, milky way planner</li>
+<li><strong>The Photographer's Ephemeris (TPE):</strong> Map-based sun/moon direction tool</li>
+<li><strong>Windy.com:</strong> Wind, cloud cover, precipitation forecasting</li>
+</ul>
+<h4>Arrive Early</h4>
+For golden hour, arrive 30–45 minutes before sunrise. The light changes rapidly — you want to be set up, composed, and ready before it happens.
+<span class="rule">Spending 2 hours planning a shoot saves 4 hours of shooting in bad light and produces better work than spontaneous trips. The image is made before you pick up the camera.</span>
+<div class="check"><strong>Project:</strong> Use PhotoPills or TPE to plan a specific sunrise shoot at a location within 30 minutes of home. Identify: exact sunrise time, sun direction, your composition position. Execute the shoot within the next 2 weeks.</div>`
+        },
+        {id:'ph-l14', title:'Exposure for Landscapes', desc:'Landscape exposure requires different thinking than other genres. The goal is to capture the full dynamic range of light — from the brightest sky to the darkest shadow.', min:35,
+         content:`<h4>The Challenge</h4>
+A landscape scene at golden hour can have 10–14 stops of dynamic range (sky vs. shadows). Camera sensors capture 12–15 stops at most. You must make choices.
+<h4>Expose to the Right (ETTR)</h4>
+<div class="ex">Set your exposure so highlights are as bright as possible without blowing out. The histogram should push toward the right without clipping. Then recover shadow detail in post.</div>
+This maximizes data captured and minimizes shadow noise.
+<h4>The Histogram</h4>
+Don't judge exposure by the image on the screen — the display brightness varies. Use the histogram:
+<ul>
+<li>Spike touching the right wall = blown highlights (unrecoverable)</li>
+<li>Spike touching the left wall = crushed blacks (recoverable in RAW)</li>
+<li>Ideal: data spread across the full range, not touching either wall</li>
+</ul>
+<h4>Long Exposures</h4>
+For smooth water and cloud movement, use shutter speeds of 0.5s–30s. Requirements:
+<ul>
+<li>Tripod (essential)</li>
+<li>Remote shutter release or 2-second timer (prevents camera shake at trigger)</li>
+<li>ND filter to reduce light and allow long exposures in daylight (see next lesson)</li>
+<li>Aperture: f/8–f/11 for maximum sharpness across the frame</li>
+</ul>
+<h4>Fujifilm X-E5 for Landscapes</h4>
+Shoot RAW for maximum dynamic range flexibility. Velvia works beautifully for landscapes with strong colors — but be careful with clipped highlights. Use highlight tone -1 or -2.
+<span class="rule">Landscape exposure is about information preservation. Get the full range onto the sensor. Decide the mood in post.</span>
+<div class="check"><strong>Quiz:</strong> Your landscape histogram shows data clustered in the left half with nothing on the right. What does this mean and how do you fix it?<br><br>
+<em>Answer: Underexposed — shadows will be noisy and detail is lost. Increase exposure until the histogram moves right without clipping highlights.</em></div>`
+        },
+        {id:'ph-l15', title:'Composition in Landscapes', desc:'Landscape composition creates depth, scale, and emotional resonance. Without it, a beautiful scene becomes a flat photograph.', min:35,
+         content:`<h4>The Fundamental Challenge</h4>
+Landscape photography translates a 3D, 360-degree sensory experience into a flat rectangle. Composition is how you create the illusion of depth and draw the viewer into the scene.
+<h4>Foreground, Midground, Background</h4>
+The most powerful landscape compositions have three layers:
+<div class="ex">Foreground: rocks, flowers, reflections, sand patterns → anchors the image<br>
+Midground: the main subject (mountain, tree, building)<br>
+Background: sky, distant hills, clouds → provides scale and context</div>
+Get low. A low angle exaggerates the foreground and creates depth.
+<h4>Leading Lines</h4>
+Roads, rivers, fences, shorelines, and rows of trees lead the eye through the frame. Place them diagonally for dynamic tension; horizontally for calm.
+<h4>Rule of Thirds for Horizons</h4>
+Never center the horizon (unless reflections are the point). Place the horizon on the top third line when the foreground is interesting. Place it on the bottom third when the sky is dramatic.
+<h4>Natural Framing</h4>
+Tree branches, rock arches, doorways, and cliff edges frame the main subject and add depth layers.
+<h4>Simplicity vs. Complexity</h4>
+<ul>
+<li>Minimalist landscapes (one subject, empty space) require perfect light and timing</li>
+<li>Complex landscapes (many elements) need clear hierarchy — one thing must dominate</li>
+</ul>
+<span class="rule">Before you set up your tripod, walk the location for 10 minutes. Try different angles. Get low, get high, move left and right. The first spot you stopped is rarely the best composition.</span>
+<div class="check"><strong>Project:</strong> Find a landscape location and shoot it from 5 different positions — including one from ground level, one from above, and one with a strong foreground element. Compare results.</div>`
+        },
+        {id:'ph-l16', title:'Filters, Long Exposure, and the Complete Landscape Kit', desc:'ND filters and polarizers unlock a range of landscape techniques that are impossible without them. Understanding when and how to use them completes your landscape toolkit.', min:40,
+         content:`<h4>The Polarizing Filter (CPL)</h4>
+<strong>What it does:</strong> Cuts reflected light. Deepens blue skies. Removes glare from water. Saturates colors in foliage.
+<br><br>
+<strong>When to use it:</strong> Any time you're shooting water, wet surfaces, or want a richer sky. Most effective when the sun is at 90 degrees to your lens.
+<br><br>
+<strong>How to use it:</strong> Attach and rotate while watching the effect in your viewfinder/screen. The effect changes as you rotate.
+<br><br>
+<strong>Limitation:</strong> Costs ~1–2 stops of light. Not effective with overcast skies (no direct light to polarize).
+<h4>ND Filters (Neutral Density)</h4>
+<strong>What they do:</strong> Reduce light entering the lens without affecting color. Allow long exposures in bright conditions.
+<div class="ex">ND4 = 2 stops of light reduction → 1/250s becomes 1/60s<br>
+ND64 = 6 stops → 1/250s becomes 1/4s<br>
+ND1000 = 10 stops → 1/250s becomes 4 seconds</div>
+<strong>Common uses:</strong>
+<ul>
+<li>Silky waterfall/river water: 1/4s to 2s → ND4 or ND16</li>
+<li>Dramatic cloud motion: 15s to 60s → ND1000</li>
+<li>Wide aperture in bright daylight for shallow depth of field: ND4–ND8</li>
+</ul>
+<h4>Graduated ND (GND)</h4>
+Dark on top, clear on bottom. Reduces exposure of bright sky while keeping foreground exposed correctly. Most useful at golden hour when the sky is bright and the land is dark.
+<h4>The Minimal Landscape Kit</h4>
+<ul>
+<li>Sturdy tripod</li>
+<li>Remote shutter release (or use X-E5's 2-second timer)</li>
+<li>Circular polarizer (sized for your lens)</li>
+<li>ND64 or ND1000 (for long exposures)</li>
+<li>Lens cloth (dew, sea spray)</li>
+</ul>
+<span class="rule">A good CPL and a good tripod will transform your landscape photography more than a camera upgrade. Invest there first.</span>
+<div class="check"><strong>Project:</strong> Find a waterfall, stream, or fountain. Shoot it at 1/500s (frozen) and then at 1/2s or slower (silky). Compare the emotional impact of each. If you have an ND filter, try 5 seconds. Notice how the different shutter speeds tell completely different stories.</div>`
+        },
       ]},
       { id:'ph-m5', title:'Building Your Practice', lessons:[
-        {id:'ph-l17', title:'The Daily Shooting Habit',      desc:'A 15-minute practice that compounds into mastery over months.', min:25},
-        {id:'ph-l18', title:'Portfolio Curation',            desc:'Edit ruthlessly — the discipline of choosing your 20 best images.', min:35},
-        {id:'ph-l19', title:'Finding Your Visual Style',     desc:'Define the aesthetic that makes your work immediately recognizable.', min:40},
-        {id:'ph-l20', title:'Photography as Revenue',        desc:'Licensing, print sales, client work, workshops, and teaching your craft.', min:50},
+        {id:'ph-l17', title:'The Daily Shooting Habit', desc:'Mastery in photography is built through repetition, not gear. A consistent daily practice compounds faster than any course or workshop.', min:25,
+         content:`<h4>The 15-Minute Practice</h4>
+You don't need to go somewhere special to practice photography. A 15-minute walk from your front door with a camera builds skills faster than monthly "photography trips."
+<h4>What to Practice Daily</h4>
+<ul>
+<li><strong>Light observation:</strong> Walk outside and identify the direction, quality, and color of light before picking up the camera</li>
+<li><strong>One subject, many angles:</strong> Pick an ordinary object and photograph it 10 different ways</li>
+<li><strong>Aperture control drills:</strong> Shoot the same subject at f/2, f/5.6, and f/16 — feel the difference</li>
+<li><strong>Decisive moment training:</strong> Watch people or movement for 10 minutes without shooting. Then shoot for 5.</li>
+</ul>
+<h4>The 365 Project</h4>
+One photograph per day for a year. Rules: no skipping, no retroactive shots. The discipline forces creativity when you "have nothing to shoot." The constraint is the point.
+<h4>Why Consistency Beats Intensity</h4>
+A weekend workshop gives you 2 days of intensive practice. A daily 15-minute habit gives you 91 hours over a year. The habit always wins.
+<span class="rule">The camera that's with you is better than the camera at home. Keep the X-E5 in your bag every day. Most great photos are made on the way to somewhere else.</span>
+<div class="check"><strong>Project:</strong> Commit to a 30-day daily photo practice. One photo per day, any subject. At the end of 30 days, print your 5 favorites and put them on a wall.</div>`
+        },
+        {id:'ph-l18', title:'Finding Your Visual Style', desc:'Your photographic style is not chosen — it emerges from what you keep returning to. The practice is to notice, not manufacture.', min:40,
+         content:`<h4>What Visual Style Actually Is</h4>
+Style is not a filter preset or a film simulation. It's a consistent set of choices: what you include, what you exclude, what light you seek, what moments you value, what your subjects feel like.
+<h4>How to Find It</h4>
+<strong>Step 1 — The 100-image audit:</strong> Pull your 100 best photos from the last year. Look for patterns without analyzing — what subjects keep appearing? What time of day? What mood?
+<br><br>
+<strong>Step 2 — Name what you see:</strong> "I keep photographing lone figures in open spaces." "I'm drawn to geometry and repetition." "All my favorites are in low, warm light." These are your tendencies — and they're your style.
+<br><br>
+<strong>Step 3 — Photographer research:</strong> Find 5 photographers whose work you admire. Study, don't copy. Ask: what are they choosing? What's left out of the frame? How do they use light?
+<h4>Influences Worth Studying</h4>
+<ul>
+<li><strong>Street:</strong> Vivian Maier, Henri Cartier-Bresson, Daido Moriyama, Saul Leiter</li>
+<li><strong>Landscape:</strong> Ansel Adams, Michael Kenna, Charlie Waite</li>
+<li><strong>Documentary:</strong> Sebastião Salgado, Dorothea Lange, Mary Ellen Mark</li>
+<li><strong>Contemporary:</strong> Search Instagram photographers in your genre — find one who makes you want to shoot</li>
+</ul>
+<span class="rule">Style is discovered through volume and reflection — not decided in advance. Shoot a lot. Look at what you make. The patterns will tell you who you are as a photographer.</span>
+<div class="check"><strong>Project:</strong> Conduct the 100-image audit. Write 3 sentences describing what you see. Share it with one person who can give honest feedback.</div>`
+        },
+        {id:'ph-l19', title:'Portfolio Curation and Editing Your Work', desc:'The images you show define you more than the images you take. Editing ruthlessly is a discipline that separates amateurs from professionals.', min:35,
+         content:`<h4>The Editing Hierarchy</h4>
+<ol style="padding-left:18px;margin:6px 0">
+<li><strong>Does it work technically?</strong> Sharp focus, clean exposure, no distracting elements that can't be cropped</li>
+<li><strong>Does it work compositionally?</strong> Is the frame deliberate? Does every element serve the image?</li>
+<li><strong>Does it work emotionally?</strong> Does it make you feel something or think something?</li>
+<li><strong>Is it the best version of this image?</strong> If a similar shot is better, this one goes.</li>
+</ol>
+<h4>The 10% Rule</h4>
+Keep no more than 10% of what you shoot. From a 100-image session, 10 is generous. From those 10, 2–3 are portfolio-worthy.
+<h4>The Waiting Period</h4>
+Don't edit images the same day you shoot them. Emotional attachment to your effort clouds judgment. Wait 24–48 hours. Look again. You'll see more clearly.
+<h4>Building a Portfolio</h4>
+A portfolio is not a gallery of everything good — it's a curated statement. 20 exceptional images with coherent style is stronger than 80 competent ones. Each image should earn its place by being better than the one it could replace.
+<span class="rule">The best photographers are ruthless editors. "Pretty good" doesn't make the cut. Every image in your portfolio should represent your highest standard at the time it was made.</span>
+<div class="check"><strong>Project:</strong> Select your single best photograph from the last 6 months. Write one paragraph about why it's your best — what decisions made it work. This exercise trains your critical eye more than any technical lesson.</div>`
+        },
+        {id:'ph-l20', title:'Photography as Revenue', desc:'Turning photography into income requires understanding which revenue models suit your style, skills, and time. Not every model works for every photographer.', min:50,
+         content:`<h4>The Revenue Models</h4>
+<strong>Client work (commission photography)</strong> — Paid shoots: events, portraits, real estate, commercial. Highest per-day rate, but income is inconsistent and requires sales/marketing skills.
+<br><br>
+<strong>Stock photography</strong> — Upload images to Shutterstock, Adobe Stock, Getty. Earn royalties over time. Low per-image rates but passive. Requires volume (1,000+ images).
+<br><br>
+<strong>Print sales</strong> — Sell physical prints through your own site (Squarespace, Format) or print-on-demand (Fine Art America). Works best when you have an audience.
+<br><br>
+<strong>Licensing</strong> — License specific images for specific uses (magazine editorial, advertising, website). Higher rates than stock for unique images.
+<br><br>
+<strong>Workshops and teaching</strong> — Teach locally or online (YouTube, Skillshare, your own course). Works when you've built reputation in a specific niche.
+<br><br>
+<strong>Social media / content creation</strong> — Build an audience around your photography. Monetize via sponsorships, affiliate links, or selling your own products.
+<h4>The Honest Truth About Stock</h4>
+Stock photography income has declined significantly. A realistic stock portfolio takes years to build and the rates are very low. Don't rely on it as primary income.
+<h4>The Path That Works</h4>
+<ol style="padding-left:18px;margin:6px 0">
+<li>Build a specific niche (street, landscape, portrait, food)</li>
+<li>Build an audience — Instagram, website, local reputation</li>
+<li>Start with client work in your niche for cash flow</li>
+<li>Add passive revenue streams (prints, stock, digital products) over time</li>
+<li>Teach when your reputation is established</li>
+</ol>
+<span class="rule">Photography revenue follows reputation. Reputation follows consistency, quality, and clarity about what you shoot. Do the work first; the money follows a specific style and point of view.</span>
+<div class="check"><strong>Project:</strong> Research one revenue model that fits your photography style. Identify three photographers who are successfully monetizing in that model. Study their pricing, their audience size, and how they market their work.</div>`
+        },
       ]},
     ]
   },
   {
     id:'revenue', title:'Revenue Basics', emoji:'💰', accent:'#d97706', accentBg:'#fef3c7',
-    desc:'Build financial clarity and create multiple streams of income',
+    desc:'B2B revenue mechanics — from bookings to ARR to GTM architecture',
     modules:[
-      { id:'rv-m1', title:'Financial Clarity', lessons:[
-        {id:'rv-l1',  title:'Know Your Numbers',          desc:'Calculate your real income, true expenses, and net worth in one session.', min:40},
-        {id:'rv-l2',  title:'The Profit First System',    desc:'Allocate income into dedicated accounts before spending — the system that works.', min:45},
-        {id:'rv-l3',  title:'Building Your Emergency Fund', desc:'Why 3–6 months matters and how to get there faster than you think.', min:30},
-        {id:'rv-l4',  title:'Cash Flow vs. Profit',       desc:'The difference between the two — and why it determines whether businesses survive.', min:35},
+      { id:'rv-m1', title:'The Revenue Stack', lessons:[
+        {id:'rv-l1', title:'How Money Flows', desc:'One deal creates four different numbers. Understanding bookings, billings, revenue, and cash is the foundation of every revenue conversation.', min:30,
+         content:`<h4>The Four Numbers</h4>
+Every deal passes through four stages — each answers a different question.<br><br>
+<strong>Bookings</strong> — What the customer committed to. <em>Did we win?</em><br>
+<strong>Billings</strong> — What you invoice. <em>What are we owed?</em><br>
+<strong>Revenue</strong> — What you earn as you deliver. <em>What did we earn?</em><br>
+<strong>Cash</strong> — What lands in the bank. <em>Can we pay people?</em>
+<h4>Worked Example</h4>
+<div class="ex">$120K · 12-month contract · billed annually upfront · net 30<br><br>
+Day 1 → Bookings $120K, Billings $120K<br>
+Day 30 → Cash $120K arrives<br>
+Each month → Revenue $10K ($120K ÷ 12)<br>
+Unearned balance = deferred revenue, shrinks $10K/month</div>
+<span class="rule">Rule: Billings follow the invoice. Revenue follows delivery, spread evenly over the term.</span>
+<h4>Why This Matters</h4>
+Sales is measured on bookings. Finance cares about revenue and cash. Mixing them up is the most common source of confusion in revenue conversations.`
+        },
+        {id:'rv-l2', title:'ACV, TCV, and Contract Math', desc:'ACV and TCV are not interchangeable. Billing frequency changes invoice timing but not contract value or monthly revenue.', min:25,
+         content:`<h4>Key Terms</h4>
+<strong>ACV</strong> (Annual Contract Value) — One year of contract value.<br>
+<strong>TCV</strong> (Total Contract Value) — Full-term value across all years.
+<h4>Examples</h4>
+<div class="ex">3-year deal at $120K/year<br>TCV = $360K &nbsp;|&nbsp; ACV = $120K</div>
+<div class="ex">2-year deal at $90K/year, billed annually<br>TCV = $180K &nbsp;|&nbsp; ACV = $90K &nbsp;|&nbsp; First-year billings = $90K &nbsp;|&nbsp; Month-one revenue = $7,500</div>
+<h4>Billing Frequency Twist</h4>
+A 3-year deal at $60K/year, billed quarterly:<br>
+<div class="ex">TCV = $180K &nbsp;|&nbsp; ACV = $60K<br>First-year billings = $60K (4 × $15K)<br>Month-one revenue = $5K ($60K ÷ 12)<br>Q1 billings = $15K</div>
+<span class="rule">Billing frequency moves invoices and cash timing. Contract value and monthly revenue stay the same.</span>`
+        },
+        {id:'rv-l3', title:'ARR — What It Is and What It Isn\'t', desc:'ARR is a snapshot of recurring revenue, not a total of what you sold. Knowing what to include and exclude is critical.', min:25,
+         content:`<h4>Definition</h4>
+ARR is the <strong>annualized value of active recurring contracts at a point in time</strong>. It is a snapshot, not a period total.
+<h4>What Goes In</h4>
+<ul>
+<li>Subscription and committed recurring fees</li>
+</ul>
+<h4>What Stays Out</h4>
+<ul>
+<li>One-time fees</li>
+<li>Implementation and professional services</li>
+<li>Variable/usage fees (unless committed)</li>
+</ul>
+<h4>Multi-Year Deals</h4>
+<div class="ex">3-year deal at $60K/year → adds $60K of ARR, not $180K</div>
+<span class="rule">Always use the annual value. TCV inflates ARR and creates misleading growth signals.</span>
+<h4>ARR vs. MRR</h4>
+MRR is monthly recurring revenue. ARR = MRR × 12. Use whichever matches your billing cadence; just never mix them in the same calculation.`
+        },
+        {id:'rv-l4', title:'The ARR Bridge', desc:'The ARR bridge explains how ARR changes over a period. Net new ARR is the number leadership watches most.', min:35,
+         content:`<h4>The Formula</h4>
+<div class="ex">Ending ARR = Beginning ARR + New Logo + Expansion − Contraction − Churn</div>
+<strong>New Logo</strong> — First-time customers<br>
+<strong>Expansion</strong> — Upsell, cross-sell, usage growth<br>
+<strong>Contraction</strong> — Downgrades (customer stays)<br>
+<strong>Churn</strong> — Lost customers
+<h4>Worked Example</h4>
+<div class="ex">Start: $10.0M ARR<br>+ New logo: $1.2M &nbsp;+ Expansion: $0.8M = gains $2.0M<br>− Contraction: $0.3M &nbsp;− Churn: $0.5M = losses $0.8M<br>Net new ARR: $1.2M<br>Ending ARR: $11.2M</div>
+<h4>The Method</h4>
+<ol style="padding-left:18px;margin:6px 0">
+<li>Total the gains</li>
+<li>Total the losses</li>
+<li>Net them → that's net new ARR</li>
+<li>Add to beginning ARR → that's ending ARR</li>
+</ol>
+<div class="check"><strong>Self-check:</strong> Ending ARR minus beginning ARR must equal net new ARR. If they don't reconcile, one number is wrong.</div>`
+        },
       ]},
-      { id:'rv-m2', title:'Revenue Streams', lessons:[
-        {id:'rv-l5',  title:'Maximizing Active Income',   desc:'Raise your rate, reduce your hours, and increase your output.', min:40},
-        {id:'rv-l6',  title:'Passive Income: What Works', desc:'Cut through the hype — these are the models that actually produce real income.', min:45},
-        {id:'rv-l7',  title:'Side Hustle Evaluation',     desc:'A framework for deciding if a side income idea is worth your time.', min:35},
-        {id:'rv-l8',  title:'Stacking Income Sources',    desc:'How to sequence multiple streams without burning out.', min:40},
+      { id:'rv-m2', title:'Retention Metrics', lessons:[
+        {id:'rv-l5', title:'GRR — Measuring Base Health', desc:'Gross Revenue Retention measures how leaky your base is. It can never exceed 100%. Low GRR is a structural problem no amount of new logo can fix permanently.', min:30,
+         content:`<h4>Formula</h4>
+<div class="ex">GRR = (Beginning ARR − Contraction − Churn) ÷ Beginning ARR</div>
+<ul>
+<li>Expansion is <strong>excluded</strong> — only losses count</li>
+<li>Capped at 100%</li>
+<li>Answers: <em>how much of what we had do we still have?</em></li>
+</ul>
+<h4>Worked Example</h4>
+<div class="ex">Beginning ARR: $10M &nbsp;|&nbsp; Contraction: $0.3M &nbsp;|&nbsp; Churn: $0.7M<br><br>
+GRR = (10 − 0.3 − 0.7) ÷ 10 = 9.0 ÷ 10 = <strong>90%</strong></div>
+<h4>Shortcut</h4>
+Convert losses to a % of beginning ARR first. Losses = $0.3M + $0.7M = $1M = 10%. GRR = 100% − 10% = 90%.
+<h4>Benchmarks</h4>
+<ul>
+<li>Enterprise SaaS: 90%+ is strong</li>
+<li>SMB SaaS: 80%+ is acceptable (higher churn is expected)</li>
+</ul>
+<span class="rule">GRR below 80% means the business is leaking faster than it can fill. No new logo strategy solves a churn problem.</span>`
+        },
+        {id:'rv-l6', title:'NRR — Does the Base Grow Itself?', desc:'Net Revenue Retention measures whether expansion offsets losses. Above 100% means you grow without adding a single new customer.', min:30,
+         content:`<h4>Formula</h4>
+<div class="ex">NRR = (Beginning ARR + Expansion − Contraction − Churn) ÷ Beginning ARR</div>
+<ul>
+<li>Expansion is <strong>included</strong></li>
+<li>Can exceed 100%</li>
+<li>Answers: <em>does the base grow on its own?</em></li>
+</ul>
+<h4>Worked Example</h4>
+<div class="ex">Beginning ARR: $10M &nbsp;|&nbsp; Expansion: $1.5M &nbsp;|&nbsp; Contraction: $0.3M &nbsp;|&nbsp; Churn: $0.7M<br><br>
+NRR = (10 + 1.5 − 0.3 − 0.7) ÷ 10 = 10.5 ÷ 10 = <strong>105%</strong></div>
+<h4>Relationship to GRR</h4>
+NRR − GRR = Expansion ÷ Beginning ARR. Use this to self-check your math.
+<div class="ex">105% − 90% = 15% = $1.5M ÷ $10M ✓</div>
+<h4>Benchmarks</h4>
+<ul>
+<li>110%+ NRR = strong (best-in-class enterprise)</li>
+<li>100–110% = healthy</li>
+<li>Below 100% = expansion isn't keeping up with leakage</li>
+</ul>
+<span class="rule">NRR above 100% is the compound growth engine. It means existing customers are funding future growth.</span>`
+        },
+        {id:'rv-l7', title:'Logo Retention and What It Reveals', desc:'Dollar retention can mask logo churn. Tracking both exposes which customer segments are actually healthy.', min:20,
+         content:`<h4>Why Logo Retention Matters</h4>
+GRR and NRR are dollar metrics. A few large expansions or a few small churns can make the numbers look fine while hiding a deeper problem.
+<h4>The Trap</h4>
+<div class="ex">You have 100 customers at $1M ARR each and 500 customers at $10K ARR each.<br>If all 500 small customers churn, you lose $5M ARR (5% of base).<br>GRR = 95% — looks solid.<br>Logo retention = 83% — alarming.</div>
+<h4>What to Track</h4>
+<ul>
+<li><strong>Dollar retention</strong> (GRR/NRR) — protects the P&L</li>
+<li><strong>Logo retention</strong> — protects future pipeline and market position</li>
+<li><strong>By cohort</strong> — tracks how each class of customers behaves over time</li>
+</ul>
+<span class="rule">Strong dollar retention with weak logo retention means you're losing small customers. The short-term numbers look fine; the long-term pipeline is eroding.</span>`
+        },
+        {id:'rv-l8', title:'Reading GRR and NRR Together', desc:'The combination of GRR and NRR tells a richer story than either metric alone. Learn to diagnose what the pair is actually saying.', min:25,
+         content:`<h4>The Four Patterns</h4>
+<div class="ex"><strong>High NRR + High GRR (e.g. 120% / 95%)</strong><br>Best-in-class. Sticky base, strong expansion motion. Typical of product-led growth or deep enterprise platforms.</div>
+<div class="ex"><strong>High NRR + Low GRR (e.g. 115% / 82%)</strong><br>Fragile. A few big expansions are masking significant churn. One lost whale and NRR collapses. Fix the base first.</div>
+<div class="ex"><strong>High GRR + Modest NRR (e.g. 92% / 98%)</strong><br>Sticky but flat. Customers stay but don't grow. The opportunity is expansion — price architecture, upsell motion, CSM incentives.</div>
+<div class="ex"><strong>Low GRR + Low NRR (e.g. 75% / 80%)</strong><br>Product-market fit or delivery problem. No GTM fix solves this. Diagnose why customers are leaving.</div>
+<h4>The Diagnostic Question</h4>
+Always ask: <em>Is expansion real growth, or is it just replacing what's churning?</em><br><br>
+If NRR ≈ 100% with high churn, expansion is running on a treadmill.`
+        },
       ]},
-      { id:'rv-m3', title:'Business Revenue', lessons:[
-        {id:'rv-l9',  title:'Pricing Your Services',       desc:'Stop undercharging. Value-based pricing that feels confident.', min:45},
-        {id:'rv-l10', title:'Sales Conversations',         desc:'How to discuss money, handle objections, and close without pressure.', min:50},
-        {id:'rv-l11', title:'Customer Value & Retention',  desc:'The lifetime value calculation that should drive every business decision.', min:35},
-        {id:'rv-l12', title:'Recurring Revenue Models',    desc:'Subscriptions, retainers, and memberships — income that renews itself.', min:40},
+      { id:'rv-m3', title:'Unit Economics', lessons:[
+        {id:'rv-l9', title:'CAC — What a Customer Actually Costs', desc:'Customer Acquisition Cost is frequently miscalculated. The blended number hides what it actually costs to win in each segment.', min:30,
+         content:`<h4>Formula</h4>
+<div class="ex">CAC = Total Sales & Marketing Spend ÷ New Customers Acquired</div>
+<h4>What to Include in S&M Spend</h4>
+<ul>
+<li>Sales salaries, commissions, and benefits</li>
+<li>Marketing salaries and benefits</li>
+<li>Advertising and demand generation spend</li>
+<li>Sales tools, CRM, and enablement</li>
+<li>Allocated overhead (real estate, etc.)</li>
+</ul>
+<h4>Why Blended CAC Misleads</h4>
+Enterprise and commercial deals have radically different costs and cycles. A blended CAC hides that enterprise may have a 12-month payback and commercial 6 months — or vice versa. Always cut CAC by segment.
+<h4>Payback Period</h4>
+<div class="ex">CAC Payback = CAC ÷ (New ARR × Gross Margin)<br><br>
+Under 18 months = generally healthy for enterprise<br>Under 12 months = efficient<br>Over 24 months = capital-intensive, needs scrutiny</div>
+<span class="rule">CAC without payback is vanity. CAC payback by segment is actionable.</span>`
+        },
+        {id:'rv-l10', title:'LTV — Lifetime Value and How It\'s Misused', desc:'LTV is often inflated by optimistic churn assumptions. The honest version is more useful than the impressive one.', min:30,
+         content:`<h4>Formula</h4>
+<div class="ex">LTV = (ARPA × Gross Margin) ÷ Churn Rate</div>
+ARPA = Average Revenue Per Account (annual)
+<h4>Example</h4>
+<div class="ex">ARPA: $60K &nbsp;|&nbsp; Gross Margin: 75% &nbsp;|&nbsp; Annual Churn: 10%<br><br>
+LTV = ($60K × 0.75) ÷ 0.10 = $45K ÷ 0.10 = <strong>$450K</strong></div>
+<h4>LTV:CAC</h4>
+<ul>
+<li>3:1 or better = generally healthy benchmark</li>
+<li>Below 1:1 = you're losing money on every customer</li>
+<li>Above 5:1 = may be under-investing in growth</li>
+</ul>
+<h4>Why LTV Is Often Wrong</h4>
+<ul>
+<li>Churn is underestimated (use trailing 4-quarter actuals, not targets)</li>
+<li>Gross margin excludes customer success costs it shouldn't</li>
+<li>Doesn't discount future cash flows</li>
+</ul>
+<span class="rule">Use LTV for directional decisions and segment comparisons. Don't build a business case on a precise LTV number.</span>`
+        },
+        {id:'rv-l11', title:'CAC Payback and Efficiency Metrics', desc:'CAC payback period is the most operationally useful unit economics metric. Pair it with the Magic Number to assess GTM efficiency.', min:35,
+         content:`<h4>CAC Payback Period</h4>
+<div class="ex">CAC Payback (months) = CAC ÷ (New ARR × Gross Margin)</div>
+Answers: <em>How many months until a new customer has paid back what it cost to acquire them?</em>
+<h4>Magic Number</h4>
+<div class="ex">Magic Number = Net New ARR in the Quarter ÷ Prior Quarter S&M Spend</div>
+<ul>
+<li>Above 0.75 = efficient GTM spend</li>
+<li>Above 1.0 = very efficient; accelerate investment</li>
+<li>Below 0.5 = investigate before adding more spend</li>
+</ul>
+<h4>Rule of 40</h4>
+<div class="ex">Growth Rate % + Profit Margin % ≥ 40%</div>
+A blended health check used by investors. A company growing 30% with 10% operating margin = 40. One growing 60% at −15% margin = 45.
+<h4>Why These Work Together</h4>
+Magic Number tells you if this quarter's spend was efficient. CAC payback tells you when you get the money back. Rule of 40 tells you if the overall business is balanced.
+<span class="rule">Efficiency metrics matter most at scale. Early-stage, growth rate dominates. Series B and beyond, payback and magic number start to drive valuation multiples.</span>`
+        },
+        {id:'rv-l12', title:'Quota, Capacity, and Attainment', desc:'Revenue capacity math is how you model the team you need to hit the number. Attainment distribution is how you know if the current team is healthy.', min:30,
+         content:`<h4>Quota Capacity</h4>
+<div class="ex">Quota Capacity = Ramped Reps × Quota × Expected Attainment</div>
+New hires are not full capacity until they ramp. Discount their quota accordingly.
+<h4>Ramp Time</h4>
+Track time to first deal and time to full productivity by hire cohort. Common enterprise ramp: 6–9 months to full productivity. Use trailing actuals, not HR assumptions.
+<h4>Quota Overassignment</h4>
+Typically set at 110–120% of the revenue target. If the target is $10M and average attainment is 85%, you need to assign $11.7M to land $10M.
+<div class="ex">Needed quota assignment = Target ÷ Expected attainment rate</div>
+<h4>Attainment Distribution</h4>
+The average attainment hides the health of the team. Look at the distribution:
+<ul>
+<li><strong>Healthy:</strong> 60–70% of reps at or above 100%</li>
+<li><strong>Warning:</strong> Average is 80% but only 40% are at quota — a few top performers are masking the rest</li>
+</ul>
+<span class="rule">Track bias (consistent over- or under-forecasting) separately from variance. Bias is a coaching problem. Variance is a data quality problem.</span>`
+        },
       ]},
-      { id:'rv-m4', title:'Investing Foundations', lessons:[
-        {id:'rv-l13', title:'Stock Market Basics',         desc:'Index funds, ETFs, and why most active investors underperform over time.', min:45},
-        {id:'rv-l14', title:'The Power of Compound Interest', desc:'The math that makes starting today better than waiting another year.', min:30},
-        {id:'rv-l15', title:'Real Estate as Wealth',       desc:'Equity, cash flow, and appreciation — the three ways property builds wealth.', min:50},
-        {id:'rv-l16', title:'Retirement Accounts',         desc:'401k, IRA, Roth IRA — maximize the accounts that reduce your tax bill.', min:40},
+      { id:'rv-m4', title:'Pipeline & Forecast', lessons:[
+        {id:'rv-l13', title:'Pipeline Coverage — Why 3x Is Wrong', desc:'Coverage is meaningful only when set from actual conversion rates by segment. A fixed 3x target is a guess dressed as a standard.', min:25,
+         content:`<h4>Coverage Formula</h4>
+<div class="ex">Coverage = Open Pipeline ÷ Remaining Quota (or Target)</div>
+<h4>Why 3x Is Misleading</h4>
+A 3x coverage target assumes a 33% win rate. But if your enterprise segment converts at 25% and commercial at 50%, you need:
+<ul>
+<li>Enterprise: 4x coverage</li>
+<li>Commercial: 2x coverage</li>
+</ul>
+Setting 3x for both is wrong in both directions.
+<h4>Setting the Right Target</h4>
+Use trailing 4-quarter conversion by: segment, source (inbound vs. outbound), and deal size. Recalculate quarterly.
+<h4>Pipeline Quality Signals</h4>
+<ul>
+<li><strong>Pipeline created:</strong> Track the share that reaches mid-stage within 90 days — anything that doesn't is likely junk</li>
+<li><strong>Deal aging:</strong> Compare each open deal to the age distribution of won deals. Past the 75th percentile of won-deal age, close rates fall sharply</li>
+</ul>
+<span class="rule">Coverage without conversion rates is theater. Coverage by segment from real data is a planning tool.</span>`
+        },
+        {id:'rv-l14', title:'Win Rate — The Number That Hides Everything', desc:'The blended win rate is nearly useless for decision-making. Cut it by every dimension that matters and you\'ll see where you actually win and lose.', min:30,
+         content:`<h4>Basic Formula</h4>
+<div class="ex">Win Rate = Won ÷ (Won + Lost)</div>
+<h4>Why Blended Win Rate Is Useless</h4>
+A 30% blended win rate could mean:
+<ul>
+<li>Enterprise: 45% &nbsp;|&nbsp; Commercial: 20%</li>
+<li>Inbound: 55% &nbsp;|&nbsp; Outbound: 15%</li>
+<li>Competitive deals: 25% &nbsp;|&nbsp; No-competition: 65%</li>
+</ul>
+The blended number hides all of this.
+<h4>Dimensions to Cut</h4>
+<ul>
+<li>Segment (enterprise, commercial, SMB)</li>
+<li>Source (inbound, outbound, partner, expansion)</li>
+<li>Deal size (by ACV band)</li>
+<li>Competitor (who you win against, who beats you)</li>
+<li>Rep (identify coaching opportunities)</li>
+</ul>
+<h4>Cohort vs. Period</h4>
+Win rate on deals <em>closed</em> in a period flatters you — slow losers fall outside the window. Measure by <em>creation cohort</em> (deals created in Q1 and tracked to resolution) for an honest picture.
+<span class="rule">Win rate by competitor is where deals are won and lost. If you don't know it, you can't train to it.</span>`
+        },
+        {id:'rv-l15', title:'Sales Velocity — The Four-Lever Framework', desc:'Sales velocity combines four variables into one number that shows which lever moves revenue most. Use it to prioritize, not as a target.', min:30,
+         content:`<h4>Formula</h4>
+<div class="ex">Sales Velocity = (Opportunities × Win Rate × ACV) ÷ Average Sales Cycle (days)</div>
+<h4>The Four Levers</h4>
+<ul>
+<li><strong>Volume (Opportunities):</strong> More pipeline → more revenue at the same conversion</li>
+<li><strong>Conversion (Win Rate):</strong> Win more of what's already in the pipe</li>
+<li><strong>Value (ACV):</strong> Bigger deals with the same effort</li>
+<li><strong>Velocity (Cycle Length):</strong> Close faster → dollars arrive sooner</li>
+</ul>
+<h4>How to Use It</h4>
+Calculate velocity for each segment separately. Then ask: if I move each lever by 10%, which one produces the most incremental revenue?
+<div class="ex">A 10% improvement in win rate usually beats a 10% improvement in pipeline volume — because it applies to every deal already in the funnel.</div>
+<h4>The One Idea Underneath Everything</h4>
+Every revenue metric maps to one of these four levers. Pipeline coverage = volume. Win rate = conversion. ACV = value. Sales cycle = velocity.
+<span class="rule">When a revenue number misses, identify which lever broke down. That's where you coach, hire, or change process.</span>`
+        },
+        {id:'rv-l16', title:'Forecast Categories and Forecast Quality', desc:'A forecast is only as good as the discipline behind the categories. Tracking bias separately from variance is how you improve.', min:25,
+         content:`<h4>The Four Categories</h4>
+<ul>
+<li><strong>Commit:</strong> High confidence. You would stake your call on this closing. Only deals here that you've personally verified.</li>
+<li><strong>Best Case:</strong> Plausible upside beyond commit. Needs specific conditions to close.</li>
+<li><strong>Pipeline:</strong> Early stage, not yet forecastable. In the funnel but not in the call.</li>
+<li><strong>Closed Won:</strong> Done.</li>
+</ul>
+<h4>Commit Discipline</h4>
+The commit category is only valuable if it's treated as a real commitment. When reps put everything in commit to look good and then miss, it destroys forecast accuracy. Inspect the commit list by asking: "What would have to happen for this not to close?"
+<h4>Bias vs. Variance</h4>
+<div class="ex"><strong>Bias:</strong> Consistently over- or under-forecasting by the same amount each period.<br>→ A coaching and discipline problem. Usually fixable.</div>
+<div class="ex"><strong>Variance:</strong> Unpredictable swings in either direction.<br>→ A data quality and process problem. Requires stage definition work.</div>
+<h4>Inspection Cadence</h4>
+Weekly commit call. Monthly pipeline review. Quarterly capacity planning. Each has a different purpose — don't conflate them.
+<span class="rule">Track forecast accuracy by rep over rolling quarters. It's the most honest measure of rep judgment and pipeline quality.</span>`
+        },
       ]},
-      { id:'rv-m5', title:'Financial Independence', lessons:[
-        {id:'rv-l17', title:'The FIRE Framework',          desc:'Financial Independence, Retire Early — the math and the mindset.', min:45},
-        {id:'rv-l18', title:'Systems That Work Passively', desc:'Automate savings, investing, and income streams.', min:40},
-        {id:'rv-l19', title:'Tax Strategy: Self-Employed', desc:'Legal ways to keep more of what you earn.', min:50},
-        {id:'rv-l20', title:'Your 10-Year Financial Vision', desc:'Build the roadmap from where you are to where you want to be.', min:60},
+      { id:'rv-m5', title:'GTM Architecture', lessons:[
+        {id:'rv-l17', title:'The Bowtie Funnel', desc:'The Bowtie extends the funnel past the close into onboarding, impact, and expansion. The post-sale half is revenue, not support.', min:35,
+         content:`<h4>Why the Traditional Funnel Is Wrong</h4>
+The classic funnel ends at "closed won." In a recurring revenue business, that's the halfway point. The real revenue happens after the sale.
+<h4>The Bowtie Model (Winning by Design)</h4>
+<div class="ex">PRE-SALE: Awareness → Education → Selection → Commitment (Close)<br>── the tie point ──<br>POST-SALE: Onboarding → Impact → Expansion → Advocacy</div>
+<h4>The Key Insight</h4>
+<ul>
+<li>Pre-sale: You're convincing someone to pay</li>
+<li>Post-sale: You're delivering on that promise</li>
+<li>Expansion: You're earning the right to grow the account</li>
+</ul>
+The tie point (the close) is where most companies put all their process, tooling, and leadership attention. Best-in-class companies invest equally post-sale.
+<h4>Metrics on Each Side</h4>
+<ul>
+<li>Pre-sale: Coverage, win rate, cycle, ACV</li>
+<li>Post-sale: Time to first value, GRR, NRR, expansion rate</li>
+</ul>
+<span class="rule">If your CSM team is understaffed relative to your AE team, you're building a leaky bucket and calling it a growth strategy.</span>`
+        },
+        {id:'rv-l18', title:'Stage Definitions and Conversion', desc:'Stage definitions based on what the buyer has done — not what the rep has done — create forecasts you can actually trust.', min:30,
+         content:`<h4>The Core Problem</h4>
+Most CRM stages are defined by rep activity: "Demo Scheduled," "Proposal Sent," "Contract Out." These measure what the seller did, not what the buyer decided. A deal can sit in "Proposal Sent" for 90 days.
+<h4>Buyer-Action Stage Definitions</h4>
+Define stages by what the buyer has <em>done</em>:
+<div class="ex">Stage 1: Prospect agreed to an initial conversation<br>
+Stage 2: Buyer confirmed the problem and agreed to evaluate<br>
+Stage 3: Buyer identified internal champion and defined success criteria<br>
+Stage 4: Buyer completed technical validation<br>
+Stage 5: Buyer approved business case internally<br>
+Stage 6: Legal/procurement engaged — close expected</div>
+<h4>Why This Matters for Forecast</h4>
+Buyer-action stages are much harder to game. A rep can't advance a deal to Stage 4 by sending a proposal — the buyer has to have done something verifiable.
+<h4>Stage Conversion Rate</h4>
+Track the percentage advancing from each stage to the next. A drop-off at Stage 3 usually means discovery is weak. A drop-off at Stage 5 usually means economic buyer isn't engaged.
+<span class="rule">Stage conversion rates by source and segment are the most actionable data set in B2B sales. They tell you exactly where deals die and why.</span>`
+        },
+        {id:'rv-l19', title:'GTM Org Design and Handoffs', desc:'Revenue leaks at handoffs. AE → CSM → Renewal → AM transitions are where the Bowtie breaks down in practice.', min:35,
+         content:`<h4>The Four Revenue Roles</h4>
+<ul>
+<li><strong>AE (Account Executive):</strong> Owns pre-sale. Closes new logo and upsells in accounts they own.</li>
+<li><strong>CSM (Customer Success Manager):</strong> Owns post-sale onboarding and impact delivery. Defines success, tracks health, surfaces expansion signals.</li>
+<li><strong>AM (Account Manager):</strong> Owns expansion in mature accounts. Runs commercial conversations CSMs shouldn't own.</li>
+<li><strong>Renewal:</strong> Owns the renewal transaction. Separate from CSM in larger orgs; combined in smaller ones.</li>
+</ul>
+<h4>Where Orgs Break Down</h4>
+<ul>
+<li>AE closes and hands off with no context transfer → CSM starts from scratch</li>
+<li>CSM owns expansion without commercial training → deals die in discovery</li>
+<li>No clear renewal owner → it falls to whoever's closest to the date</li>
+<li>Comp misalignment → AE oversells, CSM underdelivers, NRR suffers</li>
+</ul>
+<h4>The Fix</h4>
+Define handoff criteria (what must be true before a deal transfers), comp overlap to align incentives across the hand-off, and joint success plans that live in the CRM.
+<span class="rule">Org design is revenue architecture. Draw the handoffs on a whiteboard and ask: where does accountability disappear? That's where revenue leaks.</span>`
+        },
+        {id:'rv-l20', title:'The Four Levers and Diagnostics', desc:'Volume, conversion, velocity, and value. Every revenue metric maps to one of these four. Use the framework to diagnose misses and prioritize fixes.', min:40,
+         content:`<h4>The Framework</h4>
+<div class="ex">Revenue = f(Volume, Conversion, Velocity, Value)</div>
+<ul>
+<li><strong>Volume:</strong> Number of opportunities entering the funnel</li>
+<li><strong>Conversion:</strong> Win rate at each stage</li>
+<li><strong>Velocity:</strong> Speed through the funnel (sales cycle length)</li>
+<li><strong>Value:</strong> Average contract value (ACV)</li>
+</ul>
+<h4>Mapping Every Metric</h4>
+<div class="ex">Pipeline coverage → Volume<br>
+Win rate, stage conversion → Conversion<br>
+Sales cycle, time-to-close → Velocity<br>
+ACV, expansion rate, upsell → Value<br>
+GRR → Conversion (retention)<br>
+NRR → Value + Conversion combined</div>
+<h4>Diagnosing a Miss</h4>
+When the number misses, work backwards:
+<ol style="padding-left:18px;margin:6px 0">
+<li>Was pipeline sufficient? (Volume)</li>
+<li>Did we win our fair share? (Conversion)</li>
+<li>Did deals take longer than expected? (Velocity)</li>
+<li>Were deals smaller than modeled? (Value)</li>
+</ol>
+One of these four is always the root cause. Find it before building a recovery plan.
+<h4>The Prioritization Principle</h4>
+Improving conversion usually has the highest leverage because it applies to all the pipeline already in the funnel. Improving volume requires more input. Improving ACV requires positioning and packaging changes that take longer.
+<div class="check"><strong>Framework rule:</strong> Pair every lagging metric (bookings, NRR) with a leading one (stage conversion, aging, coverage). Lagging metrics tell you what happened. Leading metrics tell you what's coming.</div>`
+        },
       ]},
     ]
   }
@@ -736,6 +1533,7 @@ function openLesson(trackId, lessonId){
     <div class="modal-track-lbl" style="color:${track.accent}">${esc(track.title)} · ${esc(mod.title)}</div>
     <div class="modal-lesson-title">${esc(lesson.title)}</div>
     <div class="modal-desc">${esc(lesson.desc)}</div>
+    ${lesson.content ? `<span class="m-lbl">Lesson</span><div class="m-lesson-content">${lesson.content}</div>` : ''}
     <span class="m-lbl">Status</span>
     <div class="status-pills">${pillsHtml}</div>
     <span class="m-lbl">Notes & Takeaways</span>
