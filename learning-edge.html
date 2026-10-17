@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>The Learning Edge</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{min-height:100vh;background:linear-gradient(180deg,#1e0a3c 0%,#0c0518 100%);background-attachment:fixed;padding:24px 16px 84px;font-family:'Source Serif 4',Georgia,serif;color:#f5f0ff}
+
+/* ── Login ── */
+#loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;margin:-24px -16px 0;background:linear-gradient(160deg,#1a0a3c 0%,#4c1d95 55%,#1a0a2e 100%)}
+.login-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:8px;padding:40px 32px;text-align:center;max-width:320px;width:100%}
+.login-icon{font-size:44px;margin-bottom:14px}
+.login-title{font-size:22px;font-weight:600;color:#c4b5fd;margin-bottom:4px}
+.login-sub{font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,.4);margin-bottom:28px}
+.btn-google{display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;border:none;border-radius:6px;padding:12px 24px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:#1e0a3c;cursor:pointer;width:100%;letter-spacing:.4px;text-transform:uppercase}
+.btn-google img{width:18px;height:18px}
+
+/* ── App shell ── */
+#app{max-width:900px;margin:0 auto;display:none}
+.app-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
+.app-title{font-size:26px;font-weight:600;color:#c4b5fd;letter-spacing:.2px}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#d97706;opacity:0;transition:opacity .3s}
+.sync-dot.show{opacity:1}
+.sync-dot.offline{background:#ef4444;opacity:1}
+.app-sub{font-family:'JetBrains Mono',monospace;font-size:11px;color:#a78bfa;margin-bottom:18px;letter-spacing:.3px}
+
+/* ── Bottom nav ── */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#0c0518;border-top:1px solid #2d1b5e;display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom,0)}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;padding:9px 2px 7px;gap:3px;border:none;background:none;color:#4a2080;cursor:pointer;font-size:9px;font-weight:600;font-family:'JetBrains Mono',monospace;letter-spacing:.5px;text-transform:uppercase;transition:color .15s}
+.nav-btn .nav-icon{font-size:20px}
+.nav-btn.active{color:#a78bfa}
+
+/* ── Tab panels ── */
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* ── Track cards ── */
+.track-card{background:#160f2d;border:1px solid #2d1b5e;border-radius:12px;padding:18px;margin-bottom:16px}
+.track-head{display:flex;align-items:center;gap:14px;margin-bottom:10px}
+.track-emoji{font-size:34px;flex-shrink:0}
+.track-info{flex:1;min-width:0}
+.track-title{font-size:18px;font-weight:600;color:#c4b5fd;line-height:1.2}
+.track-desc{font-size:12px;color:#6d3aad;margin-top:3px;line-height:1.4}
+.track-pct{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;flex-shrink:0}
+.track-bar-track{height:4px;background:#1e1540;border-radius:2px;margin-bottom:8px;overflow:hidden}
+.track-bar-fill{height:4px;border-radius:2px;transition:width .5s ease}
+.track-meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:#6d3aad;margin-bottom:14px;letter-spacing:.3px}
+
+/* ── Module rows ── */
+.module-row{background:#1a1040;border:1px solid #241560;border-radius:8px;margin-bottom:8px;overflow:hidden}
+.module-head{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;cursor:pointer;-webkit-user-select:none;user-select:none}
+.module-left{display:flex;align-items:center;gap:10px}
+.module-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:#4a2080;width:18px;flex-shrink:0}
+.module-title-text{font-size:13px;font-weight:600;color:#c4b5fd}
+.module-right{display:flex;align-items:center;gap:8px}
+.module-badge{font-family:'JetBrains Mono',monospace;font-size:9px;color:#a78bfa;background:#2d1b5e;border-radius:10px;padding:2px 8px;white-space:nowrap}
+.module-arrow{font-size:12px;color:#4a2080;transition:transform .2s;display:inline-block}
+.module-arrow.open{transform:rotate(180deg)}
+.module-lessons{display:none;border-top:1px solid #241560}
+.module-lessons.open{display:block}
+
+/* ── Lesson rows ── */
+.lesson-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #160f2d;cursor:pointer;transition:background .1s}
+.lesson-row:last-child{border-bottom:none}
+.lesson-row:active,.lesson-row:hover{background:#2d1b5e22}
+.lesson-status-icon{font-size:13px;flex-shrink:0;width:16px;text-align:center}
+.lesson-text{flex:1;min-width:0}
+.lesson-title-text{font-size:13px;color:#f5f0ff;line-height:1.3}
+.lesson-title-text.done{color:#4a2080;text-decoration:line-through}
+.lesson-title-text.wip{color:#d97706}
+.lesson-dur{font-family:'JetBrains Mono',monospace;font-size:9px;color:#4a2080;flex-shrink:0}
+
+/* ── Today panel ── */
+.today-grid{display:grid;grid-template-columns:1fr 1px 1fr;gap:16px;background:#160f2d;border:1px solid #2d1b5e;border-radius:10px;padding:16px;margin-bottom:16px}
+@media(max-width:420px){.today-grid{grid-template-columns:1fr;gap:12px}}
+.today-divider{background:#2d1b5e}
+@media(max-width:420px){.today-divider{display:none}}
+.today-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#4a2080;margin-bottom:8px}
+.today-big{font-size:26px;font-weight:600;color:#d97706;line-height:1}
+.today-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:#a78bfa;margin-top:4px;line-height:1.5}
+.today-goal-link{background:none;border:none;color:#4a2080;font-family:'JetBrains Mono',monospace;font-size:9px;cursor:pointer;padding:0;text-decoration:underline}
+.goal-bar-track{height:4px;background:#1e1540;border-radius:2px;margin-top:8px;overflow:hidden}
+.goal-bar-fill{height:4px;background:linear-gradient(90deg,#7c3aed,#d97706);border-radius:2px;transition:width .4s}
+.log-btns{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.log-btn{background:#1e1540;border:1px solid #3b1d6e;color:#c4b5fd;border-radius:6px;padding:5px 12px;font-family:'JetBrains Mono',monospace;font-size:11px;cursor:pointer}
+.log-btn:active{background:#2d1b5e}
+.streak-row{margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#a78bfa;display:flex;align-items:center;gap:5px}
+
+.section-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#4a2080;margin-bottom:8px}
+.up-next-card{background:#160f2d;border:1px solid #3b1d6e;border-radius:10px;padding:14px;cursor:pointer;transition:border-color .15s;margin-bottom:16px}
+.up-next-card:hover{border-color:#5b21b6}
+.up-next-track-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px}
+.up-next-title{font-size:15px;font-weight:600;color:#c4b5fd;margin-bottom:3px}
+.up-next-meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:#6d3aad}
+.start-btn{background:#5b21b6;color:#fff;border:none;border-radius:6px;padding:8px 18px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.4px;text-transform:uppercase;cursor:pointer;margin-top:12px}
+.all-done{background:#160f2d;border:1px solid #2d1b5e;border-radius:10px;padding:24px;text-align:center;color:#6d3aad;font-style:italic;font-size:14px;margin-bottom:16px}
+
+/* ── Progress panel ── */
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+.stat-card{background:#160f2d;border:1px solid #2d1b5e;border-radius:10px;padding:14px}
+.stat-num{font-size:28px;font-weight:600;color:#d97706;line-height:1}
+.stat-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:#4a2080;margin-top:4px}
+.prog-track-row{background:#160f2d;border:1px solid #2d1b5e;border-radius:10px;padding:14px;margin-bottom:10px}
+.prog-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.prog-name{font-size:14px;font-weight:600;color:#c4b5fd}
+.prog-pct{font-family:'JetBrains Mono',monospace;font-size:12px;color:#d97706}
+.prog-bar-track{height:6px;background:#1e1540;border-radius:3px;overflow:hidden;margin-bottom:6px}
+.prog-bar-fill{height:6px;border-radius:3px;transition:width .5s}
+.prog-meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:#4a2080}
+.activity-card{background:#160f2d;border:1px solid #2d1b5e;border-radius:10px;padding:14px;margin-bottom:10px}
+.month-bars{display:flex;align-items:flex-end;gap:3px;height:56px;margin-top:10px}
+.m-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.m-bar-fill{width:100%;background:#5b21b6;border-radius:2px 2px 0 0;min-height:2px}
+.m-bar-lbl{font-family:'JetBrains Mono',monospace;font-size:7px;color:#4a2080}
+
+/* ── Modal ── */
+#modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;align-items:center;justify-content:center;padding:16px}
+#modal.open{display:flex}
+.modal-wrap{background:#160f2d;border:1px solid #3b1d6e;border-radius:12px;padding:22px 20px;width:100%;max-width:440px;color:#f5f0ff;box-shadow:0 12px 40px rgba(0,0,0,.6);max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.modal-close{float:right;background:none;border:none;color:#7c3aed;font-size:26px;cursor:pointer;line-height:1;padding:0;margin-left:10px}
+.modal-track-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px}
+.modal-lesson-title{font-size:18px;font-weight:600;color:#c4b5fd;line-height:1.3;margin-bottom:8px;padding-right:30px}
+.modal-desc{font-size:13px;color:#a78bfa;line-height:1.6;margin-bottom:16px;font-style:italic}
+.m-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:#a78bfa;margin-bottom:6px;display:block}
+.status-pills{display:flex;gap:8px;margin-bottom:16px}
+.s-pill{flex:1;padding:8px 4px;border-radius:6px;background:transparent;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.3px;text-transform:uppercase;cursor:pointer;color:#a78bfa;border:1px solid #3b1d6e;transition:all .15s;white-space:nowrap}
+.m-textarea{width:100%;padding:8px 10px;border:1px solid #3b1d6e;border-radius:6px;background:#1e1540;color:#f5f0ff;font-size:14px;font-family:'Source Serif 4',Georgia,serif;outline:none;resize:vertical;margin-bottom:14px}
+.m-textarea:focus{border-color:#7c3aed}
+.m-textarea::placeholder{color:#4a2080}
+.modal-log-row{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.modal-log-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;color:#a78bfa;flex-shrink:0}
+.modal-log-btn{background:#1e1540;border:1px solid #3b1d6e;color:#c4b5fd;border-radius:6px;padding:5px 12px;font-family:'JetBrains Mono',monospace;font-size:10px;cursor:pointer}
+.modal-log-btn:active{background:#2d1b5e}
+.modal-time-logged{font-family:'JetBrains Mono',monospace;font-size:10px;color:#d97706}
+.save-btn{width:100%;padding:11px 0;background:#5b21b6;color:#fff;border:none;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.6px;text-transform:uppercase;cursor:pointer}
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-icon">🎓</div>
+    <div class="login-title">The Learning Edge</div>
+    <div class="login-sub">Photography · Revenue Basics</div>
+    <button class="btn-google" onclick="signIn()">
+      <img src="https://www.google.com/favicon.ico" alt="">Sign in with Google
+    </button>
+  </div>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div id="app">
+  <div class="app-header">
+    <h1 class="app-title">The Learning Edge</h1>
+    <div class="sync-dot" id="syncDot"></div>
+  </div>
+  <div class="app-sub" id="appSub">Loading…</div>
+
+  <!-- Tab panels -->
+  <div class="tab-panel active" id="panel-tracks">
+    <div id="tracksContent"></div>
+  </div>
+
+  <div class="tab-panel" id="panel-today">
+    <div id="todayContent"></div>
+  </div>
+
+  <div class="tab-panel" id="panel-progress">
+    <div id="progressContent"></div>
+  </div>
+
+  <!-- Bottom nav -->
+  <div class="bottom-nav">
+    <button class="nav-btn active" id="nav-tracks" onclick="switchTab('tracks')">
+      <span class="nav-icon">📚</span>Tracks
+    </button>
+    <button class="nav-btn" id="nav-today" onclick="switchTab('today')">
+      <span class="nav-icon">📅</span>Today
+    </button>
+    <button class="nav-btn" id="nav-progress" onclick="switchTab('progress')">
+      <span class="nav-icon">📊</span>Progress
+    </button>
+  </div>
+</div>
+
+<!-- ═══ MODAL ═══ -->
+<div id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-wrap" id="modalCard"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+// ═══════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════
+const SUPABASE_URL  = 'https://roygslfbzqrszmneaypl.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJveWdzbGZienFyc3ptbmVheXBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0ODk5NjcsImV4cCI6MjA5ODA2NTk2N30.m2lmHOJMnsn3NevoSLXRzl08VFpwPObPSJGGuZyzDuE';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// ═══════════════════════════════════════════
+// CURRICULUM
+// ═══════════════════════════════════════════
+const TRACKS = [
+  {
+    id:'photography', title:'Photography', emoji:'📷', accent:'#7c3aed',
+    desc:'From exposure basics to professional technique and creative vision',
+    modules:[
+      { id:'ph-m1', title:'Camera Foundations', lessons:[
+        {id:'ph-l1',  title:'The Exposure Triangle',         desc:'Master aperture, shutter speed, and ISO — the three pillars of every image.', min:45},
+        {id:'ph-l2',  title:'Camera Modes Explained',        desc:'When to shoot Manual, Aperture Priority, Shutter Priority, and Program.', min:30},
+        {id:'ph-l3',  title:'Autofocus Systems',             desc:'Single-point, zone, and tracking AF modes for sharp results every time.', min:30},
+        {id:'ph-l4',  title:'White Balance & Color Temp',    desc:'Control color temperature for natural, warm, or cinematic looks.', min:25},
+      ]},
+      { id:'ph-m2', title:'Composition & Vision', lessons:[
+        {id:'ph-l5',  title:'Rule of Thirds & Grids',        desc:'Place your subject for maximum visual impact — and when to break the rule.', min:30},
+        {id:'ph-l6',  title:'Leading Lines & Framing',       desc:'Draw the eye through the frame using natural geometry and context.', min:35},
+        {id:'ph-l7',  title:'Depth of Field as a Tool',      desc:'Separate subject from background with intention and purpose.', min:40},
+        {id:'ph-l8',  title:'Light Direction & Quality',     desc:'Hard vs. soft light, directionality, and how light sculpts the subject.', min:35},
+      ]},
+      { id:'ph-m3', title:'Natural Light Mastery', lessons:[
+        {id:'ph-l9',  title:'Golden Hour & Blue Hour',       desc:'Shoot in the magic hours when light transforms everything it touches.', min:30},
+        {id:'ph-l10', title:'Overcast & Harsh Midday Light', desc:'Turn any lighting condition into a creative advantage.', min:35},
+        {id:'ph-l11', title:'Window Light for Portraits',    desc:'Professional portrait results with zero equipment.', min:30},
+        {id:'ph-l12', title:'Chasing Light: The Mindset',   desc:'How professionals plan shoots around light, not location.', min:25},
+      ]},
+      { id:'ph-m4', title:'Post-Processing', lessons:[
+        {id:'ph-l13', title:'Lightroom Import & Organization', desc:'Build a workflow that keeps your library searchable and manageable.', min:40},
+        {id:'ph-l14', title:'Exposure & Tone Adjustments',    desc:'Recover highlights, lift shadows, and find the perfect tonal balance.', min:45},
+        {id:'ph-l15', title:'Color Grading Fundamentals',     desc:'Create a consistent mood and visual identity across your portfolio.', min:50},
+        {id:'ph-l16', title:'Export for Social & Print',      desc:'The right settings for Instagram, web, and large-format prints.', min:25},
+      ]},
+      { id:'ph-m5', title:'Building Your Practice', lessons:[
+        {id:'ph-l17', title:'The Daily Shooting Habit',      desc:'A 15-minute practice that compounds into mastery over months.', min:25},
+        {id:'ph-l18', title:'Portfolio Curation',            desc:'Edit ruthlessly — the discipline of choosing your 20 best images.', min:35},
+        {id:'ph-l19', title:'Finding Your Visual Style',     desc:'Define the aesthetic that makes your work immediately recognizable.', min:40},
+        {id:'ph-l20', title:'Photography as Revenue',        desc:'Licensing, print sales, client work, workshops, and teaching your craft.', min:50},
+      ]},
+    ]
+  },
+  {
+    id:'revenue', title:'Revenue Basics', emoji:'💰', accent:'#d97706',
+    desc:'Build financial clarity and create multiple streams of income',
+    modules:[
+      { id:'rv-m1', title:'Financial Clarity', lessons:[
+        {id:'rv-l1',  title:'Know Your Numbers',          desc:'Calculate your real income, true expenses, and net worth in one session.', min:40},
+        {id:'rv-l2',  title:'The Profit First System',    desc:'Allocate income into dedicated accounts before spending — the system that works.', min:45},
+        {id:'rv-l3',  title:'Building Your Emergency Fund', desc:'Why 3–6 months matters and how to get there faster than you think.', min:30},
+        {id:'rv-l4',  title:'Cash Flow vs. Profit',       desc:'The difference between the two — and why it determines whether businesses survive.', min:35},
+      ]},
+      { id:'rv-m2', title:'Revenue Streams', lessons:[
+        {id:'rv-l5',  title:'Maximizing Active Income',   desc:'Raise your rate, reduce your hours, and increase your output.', min:40},
+        {id:'rv-l6',  title:'Passive Income: What Works', desc:'Cut through the hype — these are the models that actually produce real income.', min:45},
+        {id:'rv-l7',  title:'Side Hustle Evaluation',     desc:'A framework for deciding if a side income idea is worth your time.', min:35},
+        {id:'rv-l8',  title:'Stacking Income Sources',    desc:'How to sequence multiple streams without burning out.', min:40},
+      ]},
+      { id:'rv-m3', title:'Business Revenue', lessons:[
+        {id:'rv-l9',  title:'Pricing Your Services',       desc:'Stop undercharging. Value-based pricing that feels confident.', min:45},
+        {id:'rv-l10', title:'Sales Conversations',         desc:'How to discuss money, handle objections, and close without pressure.', min:50},
+        {id:'rv-l11', title:'Customer Value & Retention',  desc:'The lifetime value calculation that should drive every business decision.', min:35},
+        {id:'rv-l12', title:'Recurring Revenue Models',    desc:'Subscriptions, retainers, and memberships — income that renews itself.', min:40},
+      ]},
+      { id:'rv-m4', title:'Investing Foundations', lessons:[
+        {id:'rv-l13', title:'Stock Market Basics',         desc:'Index funds, ETFs, and why most active investors underperform over time.', min:45},
+        {id:'rv-l14', title:'The Power of Compound Interest', desc:'The math that makes starting today better than waiting another year.', min:30},
+        {id:'rv-l15', title:'Real Estate as Wealth',       desc:'Equity, cash flow, and appreciation — the three ways property builds wealth.', min:50},
+        {id:'rv-l16', title:'Retirement Accounts',         desc:'401k, IRA, Roth IRA — maximize the accounts that reduce your tax bill.', min:40},
+      ]},
+      { id:'rv-m5', title:'Financial Independence', lessons:[
+        {id:'rv-l17', title:'The FIRE Framework',          desc:'Financial Independence, Retire Early — the math and the mindset.', min:45},
+        {id:'rv-l18', title:'Systems That Work Passively', desc:'Automate savings, investing, and income streams.', min:40},
+        {id:'rv-l19', title:'Tax Strategy: Self-Employed', desc:'Legal ways to keep more of what you earn.', min:50},
+        {id:'rv-l20', title:'Your 10-Year Financial Vision', desc:'Build the roadmap from where you are to where you want to be.', min:60},
+      ]},
+    ]
+  }
+];
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let currentUser  = null;
+let progress     = {};   // {[trackId]: {[lessonId]: {status, notes, completedAt}}}
+let learningLog  = [];   // [{date, minutes, trackId}]
+let dailyGoal    = parseInt(localStorage.getItem('le_daily_goal')||'30');
+let activeTab    = 'tracks';
+let expanded     = {};   // {[moduleId]: bool}
+let modalCtx     = null; // {trackId, lessonId}
+let modalStatus  = 'not_started';
+let modalNewMin  = 0;
+let saveTimer    = null;
+
+// ═══════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function fmtMin(m){ if(!m) return ''; return m>=60?`${Math.floor(m/60)}h ${m%60>0?m%60+'m':''}`:`${m}m`; }
+
+function getLessonStatus(trackId, lessonId){
+  return progress?.[trackId]?.[lessonId]?.status || 'not_started';
+}
+function getLessonNotes(trackId, lessonId){
+  return progress?.[trackId]?.[lessonId]?.notes || '';
+}
+function statusIcon(s){
+  if(s==='completed')  return '<span style="color:#22c55e;font-size:13px">✓</span>';
+  if(s==='in_progress') return '<span style="color:#d97706;font-size:12px">◑</span>';
+  return '<span style="color:#2d1b5e;font-size:12px">○</span>';
+}
+function calcTrackProgress(trackId){
+  const track = TRACKS.find(t=>t.id===trackId); if(!track) return {done:0,total:0,pct:0};
+  let done=0, total=0;
+  track.modules.forEach(m=>m.lessons.forEach(l=>{
+    total++;
+    if(getLessonStatus(trackId,l.id)==='completed') done++;
+  }));
+  return {done, total, pct: total>0 ? Math.round(done/total*100) : 0};
+}
+function calcAllProgress(){
+  let done=0, total=0;
+  TRACKS.forEach(t=>{ const p=calcTrackProgress(t.id); done+=p.done; total+=p.total; });
+  return {done, total, pct: total>0 ? Math.round(done/total*100) : 0};
+}
+function todayMinutes(){
+  return learningLog.filter(e=>e.date===todayStr()).reduce((s,e)=>s+e.minutes,0);
+}
+function calcStreak(){
+  const dates=new Set(learningLog.map(e=>e.date));
+  let streak=0, d=new Date();
+  if(!dates.has(todayStr())) d.setDate(d.getDate()-1);
+  while(dates.has(d.toISOString().slice(0,10))){ streak++; d.setDate(d.getDate()-1); }
+  return streak;
+}
+function totalMinutes(){
+  return learningLog.reduce((s,e)=>s+e.minutes,0);
+}
+function getNextLesson(){
+  for(const track of TRACKS){
+    for(const mod of track.modules){
+      for(const lesson of mod.lessons){
+        const s=getLessonStatus(track.id,lesson.id);
+        if(s==='in_progress') return {track,mod,lesson};
+      }
+    }
+  }
+  for(const track of TRACKS){
+    for(const mod of track.modules){
+      for(const lesson of mod.lessons){
+        if(getLessonStatus(track.id,lesson.id)==='not_started') return {track,mod,lesson};
+      }
+    }
+  }
+  return null;
+}
+
+// ═══════════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════════
+const lsProgKey = ()=>`le_prog_${currentUser?.id}`;
+const lsLogKey  = ()=>`le_log_${currentUser?.id}`;
+
+function saveLocal(){
+  try{ localStorage.setItem(lsProgKey(), JSON.stringify(progress)); }catch(e){}
+  try{ localStorage.setItem(lsLogKey(),  JSON.stringify(learningLog)); }catch(e){}
+}
+function loadLocal(){
+  try{ const v=localStorage.getItem(lsProgKey()); if(v) progress=JSON.parse(v); }catch(e){}
+  try{ const v=localStorage.getItem(lsLogKey());  if(v) learningLog=JSON.parse(v); }catch(e){}
+}
+
+function setSyncStatus(s){
+  const dot=document.getElementById('syncDot'); if(!dot) return;
+  dot.classList.remove('show','offline');
+  if(s==='saving') dot.classList.add('show');
+  if(s==='offline') dot.classList.add('offline');
+}
+window.addEventListener('online',  ()=>{ setSyncStatus(''); flushToSupabase(); });
+window.addEventListener('offline', ()=>setSyncStatus('offline'));
+
+async function flushToSupabase(){
+  if(!currentUser||!navigator.onLine) return;
+  setSyncStatus('saving');
+  try{
+    const{error}=await sb.from('reading_tracker').upsert([
+      {user_id:currentUser.id, key:'le_progress', data:{progress}, updated_at:new Date().toISOString()},
+      {user_id:currentUser.id, key:'le_log',      data:{log:learningLog}, updated_at:new Date().toISOString()},
+    ],{onConflict:'user_id,key'});
+    setSyncStatus(error?'offline':'');
+  }catch(e){ setSyncStatus('offline'); }
+}
+
+function persistData(){
+  saveLocal();
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(flushToSupabase, 800);
+}
+
+// ═══════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════
+function cacheUser(u){ try{localStorage.setItem('le_user',JSON.stringify({id:u.id,email:u.email}));}catch(e){} }
+function getCachedUser(){ try{const v=localStorage.getItem('le_user');return v?JSON.parse(v):null;}catch(e){return null;} }
+
+sb.auth.onAuthStateChange((event,session)=>{
+  if(session?.user){
+    currentUser=session.user; cacheUser(session.user);
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('app').style.display='block';
+    startApp();
+  } else {
+    const cached=getCachedUser();
+    if(cached&&!navigator.onLine){
+      currentUser=cached;
+      document.getElementById('loginScreen').style.display='none';
+      document.getElementById('app').style.display='block';
+      startApp(); setSyncStatus('offline');
+    } else {
+      currentUser=null;
+      document.getElementById('loginScreen').style.display='flex';
+      document.getElementById('app').style.display='none';
+    }
+  }
+});
+
+async function signIn(){
+  await sb.auth.signInWithOAuth({provider:'google',
+    options:{redirectTo:location.href.split('#')[0].split('?')[0]}});
+}
+
+// ═══════════════════════════════════════════
+// STARTUP
+// ═══════════════════════════════════════════
+async function startApp(){
+  loadLocal();
+  render();
+  try{
+    const{data}=await sb.from('reading_tracker').select('key,data').eq('user_id',currentUser.id)
+      .in('key',['le_progress','le_log']);
+    if(!data) return;
+    const pRow=data.find(r=>r.key==='le_progress');
+    const lRow=data.find(r=>r.key==='le_log');
+    if(pRow?.data?.progress) progress=pRow.data.progress;
+    if(lRow?.data?.log) learningLog=lRow.data.log;
+    saveLocal();
+  }catch(e){}
+  render();
+}
+
+// ═══════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════
+function render(){
+  const allP=calcAllProgress();
+  const sub=document.getElementById('appSub');
+  if(sub) sub.textContent=`${allP.done} of ${allP.total} lessons complete · ${allP.pct}%`;
+  renderTracks();
+  renderToday();
+  renderProgress();
+}
+
+// ── Tracks ──
+function renderTracks(){
+  const el=document.getElementById('tracksContent'); if(!el) return;
+  el.innerHTML=TRACKS.map(track=>{
+    const {done,total,pct}=calcTrackProgress(track.id);
+    const modulesHtml=track.modules.map((mod,mi)=>{
+      const isOpen=!!expanded[mod.id];
+      const modDone=mod.lessons.filter(l=>getLessonStatus(track.id,l.id)==='completed').length;
+      const modWip=mod.lessons.filter(l=>getLessonStatus(track.id,l.id)==='in_progress').length;
+      const lessonsHtml=mod.lessons.map(lesson=>{
+        const st=getLessonStatus(track.id,lesson.id);
+        return `<div class="lesson-row" onclick="openLesson('${track.id}','${lesson.id}')">
+          <div class="lesson-status-icon">${statusIcon(st)}</div>
+          <div class="lesson-text">
+            <div class="lesson-title-text${st==='completed'?' done':st==='in_progress'?' wip':''}">${esc(lesson.title)}</div>
+          </div>
+          <div class="lesson-dur">${fmtMin(lesson.min)}</div>
+        </div>`;
+      }).join('');
+      const badgeLabel=modDone===mod.lessons.length?'Complete':modWip>0?`${modDone+modWip} active`:`${modDone}/${mod.lessons.length}`;
+      return `<div class="module-row">
+        <div class="module-head" onclick="toggleModule('${mod.id}')">
+          <div class="module-left">
+            <div class="module-num">0${mi+1}</div>
+            <div class="module-title-text">${esc(mod.title)}</div>
+          </div>
+          <div class="module-right">
+            <div class="module-badge">${badgeLabel}</div>
+            <div class="module-arrow${isOpen?' open':''}">▾</div>
+          </div>
+        </div>
+        <div class="module-lessons${isOpen?' open':''}">${lessonsHtml}</div>
+      </div>`;
+    }).join('');
+    return `<div class="track-card">
+      <div class="track-head">
+        <div class="track-emoji">${track.emoji}</div>
+        <div class="track-info">
+          <div class="track-title">${esc(track.title)}</div>
+          <div class="track-desc">${esc(track.desc)}</div>
+        </div>
+        <div class="track-pct" style="color:${track.accent}">${pct}%</div>
+      </div>
+      <div class="track-bar-track"><div class="track-bar-fill" style="width:${pct}%;background:${track.accent}"></div></div>
+      <div class="track-meta">${done} of ${total} lessons complete</div>
+      ${modulesHtml}
+    </div>`;
+  }).join('');
+}
+
+// ── Today ──
+function renderToday(){
+  const el=document.getElementById('todayContent'); if(!el) return;
+  const todMin=todayMinutes(), streak=calcStreak();
+  const pct=Math.min(100,dailyGoal>0?Math.round(todMin/dailyGoal*100):0);
+  const goalMet=todMin>=dailyGoal;
+  const next=getNextLesson();
+
+  const nextHtml=next
+    ?`<div class="section-lbl">Up Next</div>
+      <div class="up-next-card" onclick="openLesson('${next.track.id}','${next.lesson.id}')">
+        <div class="up-next-track-lbl" style="color:${next.track.accent}">${esc(next.track.title)} · ${esc(next.mod.title)}</div>
+        <div class="up-next-title">${esc(next.lesson.title)}</div>
+        <div class="up-next-meta">${fmtMin(next.lesson.min)} estimated · tap to open</div>
+        <button class="start-btn" onclick="event.stopPropagation();openLesson('${next.track.id}','${next.lesson.id}')">Start Session →</button>
+      </div>`
+    :`<div class="all-done">🎉 All lessons complete — check back for new tracks soon.</div>`;
+
+  el.innerHTML=`
+    <div class="today-grid">
+      <div>
+        <div class="today-lbl">Today's Learning</div>
+        <div class="today-big">${todMin} min${goalMet?' ✓':''}</div>
+        <div class="today-sub">Goal: ${dailyGoal} min
+          &nbsp;<button class="today-goal-link" onclick="setDailyGoal()">change</button>
+        </div>
+        <div class="goal-bar-track"><div class="goal-bar-fill" style="width:${pct}%"></div></div>
+        <div class="log-btns">
+          <button class="log-btn" onclick="logTime(15)">+15</button>
+          <button class="log-btn" onclick="logTime(30)">+30</button>
+          <button class="log-btn" onclick="logTime(60)">+60</button>
+          <button class="log-btn" onclick="logTime('custom')">+?</button>
+        </div>
+      </div>
+      <div class="today-divider"></div>
+      <div>
+        <div class="today-lbl">Streak</div>
+        <div class="today-big" style="color:${streak>0?'#d97706':'#3b1d6e'}">${streak>0?streak:0}</div>
+        <div class="today-sub">${streak>0?`day${streak!==1?'s':''} in a row`:'Log today to start'}</div>
+        ${streak>0?`<div class="streak-row">🔥 Keep it going — don't break the chain</div>`:''}
+      </div>
+    </div>
+    ${nextHtml}`;
+}
+
+// ── Progress ──
+function renderProgress(){
+  const el=document.getElementById('progressContent'); if(!el) return;
+  const allP=calcAllProgress();
+  const streak=calcStreak(), totMin=totalMinutes();
+
+  // Monthly activity (last 6 months)
+  const now=new Date();
+  const months=[];
+  for(let i=5;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    const y=d.getFullYear(), m=d.getMonth();
+    const key=`${y}-${String(m+1).padStart(2,'0')}`;
+    const min=learningLog.filter(e=>e.date.startsWith(key)).reduce((s,e)=>s+e.minutes,0);
+    months.push({lbl:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m], min});
+  }
+  const maxMin=Math.max(...months.map(m=>m.min),1);
+  const barsHtml=months.map(m=>`
+    <div class="m-bar-col">
+      <div class="m-bar-fill" style="height:${Math.round(m.min/maxMin*48)+4}px;${m.min>0?'':'opacity:.3'}"></div>
+      <div class="m-bar-lbl">${m.lbl}</div>
+    </div>`).join('');
+
+  const trackRowsHtml=TRACKS.map(t=>{
+    const {done,total,pct}=calcTrackProgress(t.id);
+    const trackMin=learningLog.filter(e=>e.trackId===t.id).reduce((s,e)=>s+e.minutes,0);
+    return `<div class="prog-track-row">
+      <div class="prog-head">
+        <div class="prog-name">${t.emoji} ${esc(t.title)}</div>
+        <div class="prog-pct">${pct}%</div>
+      </div>
+      <div class="prog-bar-track"><div class="prog-bar-fill" style="width:${pct}%;background:${t.accent}"></div></div>
+      <div class="prog-meta">${done} of ${total} lessons · ${fmtMin(trackMin)||'0m'} logged</div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML=`
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-num">${allP.done}</div><div class="stat-lbl">Lessons Done</div></div>
+      <div class="stat-card"><div class="stat-num">${fmtMin(totMin)||'0'}</div><div class="stat-lbl">Total Time</div></div>
+      <div class="stat-card"><div class="stat-num">${streak}</div><div class="stat-lbl">Day Streak</div></div>
+      <div class="stat-card"><div class="stat-num">${allP.pct}%</div><div class="stat-lbl">Overall</div></div>
+    </div>
+    ${trackRowsHtml}
+    <div class="activity-card">
+      <div class="today-lbl">Monthly Activity</div>
+      <div class="month-bars">${barsHtml}</div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+function switchTab(tab){
+  activeTab=tab;
+  ['tracks','today','progress'].forEach(t=>{
+    document.getElementById('nav-'+t).classList.toggle('active',t===tab);
+    document.getElementById('panel-'+t).classList.toggle('active',t===tab);
+  });
+}
+
+function toggleModule(modId){
+  expanded[modId]=!expanded[modId];
+  renderTracks();
+}
+
+// ═══════════════════════════════════════════
+// LESSON MODAL
+// ═══════════════════════════════════════════
+function openLesson(trackId, lessonId){
+  const track=TRACKS.find(t=>t.id===trackId); if(!track) return;
+  let lesson=null, mod=null;
+  for(const m of track.modules){ const l=m.lessons.find(l=>l.id===lessonId); if(l){lesson=l;mod=m;break;} }
+  if(!lesson) return;
+  modalCtx={trackId,lessonId};
+  modalStatus=getLessonStatus(trackId,lessonId);
+  modalNewMin=0;
+  const notes=getLessonNotes(trackId,lessonId);
+  const lessonMin=learningLog.filter(e=>e.trackId===trackId&&e.lessonId===lessonId).reduce((s,e)=>s+e.minutes,0);
+
+  const pillsHtml=[
+    {key:'not_started',  label:'Not Started'},
+    {key:'in_progress',  label:'In Progress'},
+    {key:'completed',    label:'Completed'},
+  ].map(p=>{
+    const active=modalStatus===p.key;
+    const color=p.key==='completed'?'#22c55e':p.key==='in_progress'?'#d97706':'#7c3aed';
+    return `<button type="button" class="s-pill" id="sp_${p.key}" onclick="selectStatus('${p.key}')"
+      style="${active?`border:2px solid ${color};background:${color}22;color:${color}`:''}">${p.label}</button>`;
+  }).join('');
+
+  document.getElementById('modalCard').innerHTML=`
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-track-lbl" style="color:${track.accent}">${esc(track.title)} · ${esc(mod.title)}</div>
+    <div class="modal-lesson-title">${esc(lesson.title)}</div>
+    <div class="modal-desc">${esc(lesson.desc)}</div>
+    <span class="m-lbl">Status</span>
+    <div class="status-pills">${pillsHtml}</div>
+    <span class="m-lbl">Notes & Takeaways</span>
+    <textarea class="m-textarea" id="mNotes" rows="4" placeholder="Key insights, quotes, things to practice…">${esc(notes)}</textarea>
+    <div class="modal-log-row">
+      <span class="modal-log-lbl">Log time:</span>
+      <button class="modal-log-btn" onclick="addModalMin(15)">+15m</button>
+      <button class="modal-log-btn" onclick="addModalMin(30)">+30m</button>
+      <button class="modal-log-btn" onclick="addModalMin(60)">+60m</button>
+      <span class="modal-time-logged" id="modalMinDisplay">${lessonMin>0?fmtMin(lessonMin)+' logged':''}${modalNewMin>0?' (+'+modalNewMin+'m)':''}</span>
+    </div>
+    <button class="save-btn" onclick="saveLesson()">Save</button>`;
+
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeModal(){
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow='';
+  modalCtx=null; modalNewMin=0;
+}
+
+function selectStatus(s){
+  modalStatus=s;
+  const colors={completed:'#22c55e', in_progress:'#d97706', not_started:'#7c3aed'};
+  ['not_started','in_progress','completed'].forEach(k=>{
+    const pill=document.getElementById('sp_'+k); if(!pill) return;
+    const active=k===s;
+    pill.style.border=active?`2px solid ${colors[k]}`:'1px solid #3b1d6e';
+    pill.style.background=active?`${colors[k]}22`:'transparent';
+    pill.style.color=active?colors[k]:'';
+  });
+}
+
+function addModalMin(n){
+  modalNewMin+=n;
+  const {trackId,lessonId}=modalCtx||{};
+  const lessonMin=learningLog.filter(e=>e.trackId===trackId&&e.lessonId===lessonId).reduce((s,e)=>s+e.minutes,0);
+  const el=document.getElementById('modalMinDisplay');
+  if(el) el.textContent=(lessonMin>0?fmtMin(lessonMin)+' logged ':'')+`(+${modalNewMin}m)`;
+}
+
+function saveLesson(){
+  const {trackId,lessonId}=modalCtx||{}; if(!trackId||!lessonId) return;
+  if(!progress[trackId]) progress[trackId]={};
+  const prev=progress[trackId][lessonId]||{};
+  progress[trackId][lessonId]={
+    status: modalStatus,
+    notes: document.getElementById('mNotes')?.value||'',
+    completedAt: modalStatus==='completed'?(prev.completedAt||new Date().toISOString()):null,
+  };
+  if(modalNewMin>0){
+    learningLog.push({date:todayStr(), minutes:modalNewMin, trackId, lessonId});
+  }
+  persistData(); render(); closeModal();
+}
+
+// ═══════════════════════════════════════════
+// DAILY LOG
+// ═══════════════════════════════════════════
+function logTime(n){
+  if(n==='custom'){
+    const v=prompt('Minutes learned:',''); const p=parseInt(v); if(!p||p<1) return; n=p;
+  }
+  learningLog.push({date:todayStr(), minutes:n});
+  persistData(); renderToday(); renderProgress();
+}
+
+function setDailyGoal(){
+  const v=prompt('Daily learning goal (minutes):',dailyGoal); if(v===null) return;
+  const n=parseInt(v); if(!n||n<1) return;
+  dailyGoal=n;
+  localStorage.setItem('le_daily_goal',String(n));
+  renderToday();
+}
+</script>
+</body>
+</html>
