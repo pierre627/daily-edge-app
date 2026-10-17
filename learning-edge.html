@@ -7,135 +7,151 @@
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{min-height:100vh;background:linear-gradient(180deg,#1e0a3c 0%,#0c0518 100%);background-attachment:fixed;padding:24px 16px 84px;font-family:'Source Serif 4',Georgia,serif;color:#f5f0ff}
+body{min-height:100vh;background:#f1f5f9;padding:24px 16px 88px;font-family:'Source Serif 4',Georgia,serif;color:#1e293b}
 
 /* ── Login ── */
 #loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;margin:-24px -16px 0;background:linear-gradient(160deg,#1a0a3c 0%,#4c1d95 55%,#1a0a2e 100%)}
-.login-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:8px;padding:40px 32px;text-align:center;max-width:320px;width:100%}
+.login-card{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:40px 32px;text-align:center;max-width:320px;width:100%}
 .login-icon{font-size:44px;margin-bottom:14px}
-.login-title{font-size:22px;font-weight:600;color:#c4b5fd;margin-bottom:4px}
+.login-title{font-size:22px;font-weight:600;color:#e9d5ff;margin-bottom:4px}
 .login-sub{font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,.4);margin-bottom:28px}
-.btn-google{display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;border:none;border-radius:6px;padding:12px 24px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:#1e0a3c;cursor:pointer;width:100%;letter-spacing:.4px;text-transform:uppercase}
+.btn-google{display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;border:none;border-radius:8px;padding:12px 24px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:#1e0a3c;cursor:pointer;width:100%;letter-spacing:.4px;text-transform:uppercase}
 .btn-google img{width:18px;height:18px}
 
 /* ── App shell ── */
 #app{max-width:900px;margin:0 auto;display:none}
 .app-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
-.app-title{font-size:26px;font-weight:600;color:#c4b5fd;letter-spacing:.2px}
+.app-title{font-size:26px;font-weight:600;color:#7c3aed;letter-spacing:.2px}
 .sync-dot{width:7px;height:7px;border-radius:50%;background:#d97706;opacity:0;transition:opacity .3s}
 .sync-dot.show{opacity:1}
 .sync-dot.offline{background:#ef4444;opacity:1}
-.app-sub{font-family:'JetBrains Mono',monospace;font-size:11px;color:#a78bfa;margin-bottom:18px;letter-spacing:.3px}
+.app-sub{font-family:'JetBrains Mono',monospace;font-size:11px;color:#94a3b8;margin-bottom:18px;letter-spacing:.3px}
 
 /* ── Bottom nav ── */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#0c0518;border-top:1px solid #2d1b5e;display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom,0)}
-.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;padding:9px 2px 7px;gap:3px;border:none;background:none;color:#4a2080;cursor:pointer;font-size:9px;font-weight:600;font-family:'JetBrains Mono',monospace;letter-spacing:.5px;text-transform:uppercase;transition:color .15s}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e2e8f0;display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom,0);box-shadow:0 -2px 12px rgba(0,0,0,.06)}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;padding:9px 2px 7px;gap:3px;border:none;background:none;color:#94a3b8;cursor:pointer;font-size:9px;font-weight:600;font-family:'JetBrains Mono',monospace;letter-spacing:.5px;text-transform:uppercase;transition:color .15s}
 .nav-btn .nav-icon{font-size:20px}
-.nav-btn.active{color:#a78bfa}
+.nav-btn.active{color:#7c3aed}
 
 /* ── Tab panels ── */
 .tab-panel{display:none}
 .tab-panel.active{display:block}
 
 /* ── Track cards ── */
-.track-card{background:#160f2d;border:1px solid #2d1b5e;border-radius:12px;padding:18px;margin-bottom:16px}
+.track-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
 .track-head{display:flex;align-items:center;gap:14px;margin-bottom:10px}
 .track-emoji{font-size:34px;flex-shrink:0}
 .track-info{flex:1;min-width:0}
-.track-title{font-size:18px;font-weight:600;color:#c4b5fd;line-height:1.2}
-.track-desc{font-size:12px;color:#6d3aad;margin-top:3px;line-height:1.4}
+.track-title{font-size:18px;font-weight:600;color:#1e293b;line-height:1.2}
+.track-desc{font-size:12px;color:#94a3b8;margin-top:3px;line-height:1.4}
 .track-pct{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;flex-shrink:0}
-.track-bar-track{height:4px;background:#1e1540;border-radius:2px;margin-bottom:8px;overflow:hidden}
+.track-bar-track{height:4px;background:#f1f5f9;border-radius:2px;margin-bottom:8px;overflow:hidden}
 .track-bar-fill{height:4px;border-radius:2px;transition:width .5s ease}
-.track-meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:#6d3aad;margin-bottom:14px;letter-spacing:.3px}
+.track-meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:#94a3b8;margin-bottom:14px;letter-spacing:.3px}
 
 /* ── Module rows ── */
-.module-row{background:#1a1040;border:1px solid #241560;border-radius:8px;margin-bottom:8px;overflow:hidden}
+.module-row{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:8px;overflow:hidden}
 .module-head{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;cursor:pointer;-webkit-user-select:none;user-select:none}
 .module-left{display:flex;align-items:center;gap:10px}
-.module-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:#4a2080;width:18px;flex-shrink:0}
-.module-title-text{font-size:13px;font-weight:600;color:#c4b5fd}
+.module-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:#94a3b8;width:18px;flex-shrink:0}
+.module-title-text{font-size:13px;font-weight:600;color:#334155}
 .module-right{display:flex;align-items:center;gap:8px}
-.module-badge{font-family:'JetBrains Mono',monospace;font-size:9px;color:#a78bfa;background:#2d1b5e;border-radius:10px;padding:2px 8px;white-space:nowrap}
-.module-arrow{font-size:12px;color:#4a2080;transition:transform .2s;display:inline-block}
+.module-badge{font-family:'JetBrains Mono',monospace;font-size:9px;color:#7c3aed;background:#ede9fe;border-radius:10px;padding:2px 8px;white-space:nowrap}
+.module-arrow{font-size:12px;color:#94a3b8;transition:transform .2s;display:inline-block}
 .module-arrow.open{transform:rotate(180deg)}
-.module-lessons{display:none;border-top:1px solid #241560}
+.module-lessons{display:none;border-top:1px solid #e2e8f0;background:#fff}
 .module-lessons.open{display:block}
 
 /* ── Lesson rows ── */
-.lesson-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #160f2d;cursor:pointer;transition:background .1s}
+.lesson-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #f1f5f9;cursor:pointer;transition:background .1s}
 .lesson-row:last-child{border-bottom:none}
-.lesson-row:active,.lesson-row:hover{background:#2d1b5e22}
+.lesson-row:active,.lesson-row:hover{background:#f8fafc}
 .lesson-status-icon{font-size:13px;flex-shrink:0;width:16px;text-align:center}
 .lesson-text{flex:1;min-width:0}
-.lesson-title-text{font-size:13px;color:#f5f0ff;line-height:1.3}
-.lesson-title-text.done{color:#4a2080;text-decoration:line-through}
+.lesson-title-text{font-size:13px;color:#334155;line-height:1.3}
+.lesson-title-text.done{color:#94a3b8;text-decoration:line-through}
 .lesson-title-text.wip{color:#d97706}
-.lesson-dur{font-family:'JetBrains Mono',monospace;font-size:9px;color:#4a2080;flex-shrink:0}
+.lesson-dur{font-family:'JetBrains Mono',monospace;font-size:9px;color:#94a3b8;flex-shrink:0}
 
 /* ── Today panel ── */
-.today-grid{display:grid;grid-template-columns:1fr 1px 1fr;gap:16px;background:#160f2d;border:1px solid #2d1b5e;border-radius:10px;padding:16px;margin-bottom:16px}
+.today-grid{display:grid;grid-template-columns:1fr 1px 1fr;gap:16px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
 @media(max-width:420px){.today-grid{grid-template-columns:1fr;gap:12px}}
-.today-divider{background:#2d1b5e}
+.today-divider{background:#e2e8f0}
 @media(max-width:420px){.today-divider{display:none}}
-.today-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#4a2080;margin-bottom:8px}
+.today-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:8px}
 .today-big{font-size:26px;font-weight:600;color:#d97706;line-height:1}
-.today-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:#a78bfa;margin-top:4px;line-height:1.5}
-.today-goal-link{background:none;border:none;color:#4a2080;font-family:'JetBrains Mono',monospace;font-size:9px;cursor:pointer;padding:0;text-decoration:underline}
-.goal-bar-track{height:4px;background:#1e1540;border-radius:2px;margin-top:8px;overflow:hidden}
+.today-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:#64748b;margin-top:4px;line-height:1.5}
+.today-goal-link{background:none;border:none;color:#7c3aed;font-family:'JetBrains Mono',monospace;font-size:9px;cursor:pointer;padding:0;text-decoration:underline}
+.goal-bar-track{height:4px;background:#f1f5f9;border-radius:2px;margin-top:8px;overflow:hidden}
 .goal-bar-fill{height:4px;background:linear-gradient(90deg,#7c3aed,#d97706);border-radius:2px;transition:width .4s}
 .log-btns{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
-.log-btn{background:#1e1540;border:1px solid #3b1d6e;color:#c4b5fd;border-radius:6px;padding:5px 12px;font-family:'JetBrains Mono',monospace;font-size:11px;cursor:pointer}
-.log-btn:active{background:#2d1b5e}
-.streak-row{margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#a78bfa;display:flex;align-items:center;gap:5px}
+.log-btn{background:#f1f5f9;border:1px solid #e2e8f0;color:#334155;border-radius:6px;padding:5px 12px;font-family:'JetBrains Mono',monospace;font-size:11px;cursor:pointer}
+.log-btn:active{background:#e2e8f0}
+.streak-row{margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#64748b;display:flex;align-items:center;gap:5px}
 
-.section-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#4a2080;margin-bottom:8px}
-.up-next-card{background:#160f2d;border:1px solid #3b1d6e;border-radius:10px;padding:14px;cursor:pointer;transition:border-color .15s;margin-bottom:16px}
-.up-next-card:hover{border-color:#5b21b6}
+.section-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:8px}
+.up-next-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px;cursor:pointer;transition:border-color .15s;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.up-next-card:hover{border-color:#7c3aed}
 .up-next-track-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px}
-.up-next-title{font-size:15px;font-weight:600;color:#c4b5fd;margin-bottom:3px}
-.up-next-meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:#6d3aad}
-.start-btn{background:#5b21b6;color:#fff;border:none;border-radius:6px;padding:8px 18px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.4px;text-transform:uppercase;cursor:pointer;margin-top:12px}
-.all-done{background:#160f2d;border:1px solid #2d1b5e;border-radius:10px;padding:24px;text-align:center;color:#6d3aad;font-style:italic;font-size:14px;margin-bottom:16px}
+.up-next-title{font-size:15px;font-weight:600;color:#1e293b;margin-bottom:3px}
+.up-next-meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:#94a3b8}
+.start-btn{background:#7c3aed;color:#fff;border:none;border-radius:6px;padding:8px 18px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.4px;text-transform:uppercase;cursor:pointer;margin-top:12px}
+.all-done{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;text-align:center;color:#94a3b8;font-style:italic;font-size:14px;margin-bottom:16px}
 
 /* ── Progress panel ── */
 .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
-.stat-card{background:#160f2d;border:1px solid #2d1b5e;border-radius:10px;padding:14px}
+.stat-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
 .stat-num{font-size:28px;font-weight:600;color:#d97706;line-height:1}
-.stat-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:#4a2080;margin-top:4px}
-.prog-track-row{background:#160f2d;border:1px solid #2d1b5e;border-radius:10px;padding:14px;margin-bottom:10px}
+.stat-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:#94a3b8;margin-top:4px}
+.prog-track-row{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
 .prog-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
-.prog-name{font-size:14px;font-weight:600;color:#c4b5fd}
+.prog-name{font-size:14px;font-weight:600;color:#1e293b}
 .prog-pct{font-family:'JetBrains Mono',monospace;font-size:12px;color:#d97706}
-.prog-bar-track{height:6px;background:#1e1540;border-radius:3px;overflow:hidden;margin-bottom:6px}
+.prog-bar-track{height:6px;background:#f1f5f9;border-radius:3px;overflow:hidden;margin-bottom:6px}
 .prog-bar-fill{height:6px;border-radius:3px;transition:width .5s}
-.prog-meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:#4a2080}
-.activity-card{background:#160f2d;border:1px solid #2d1b5e;border-radius:10px;padding:14px;margin-bottom:10px}
+.prog-meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:#94a3b8}
+.activity-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
 .month-bars{display:flex;align-items:flex-end;gap:3px;height:56px;margin-top:10px}
 .m-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
-.m-bar-fill{width:100%;background:#5b21b6;border-radius:2px 2px 0 0;min-height:2px}
-.m-bar-lbl{font-family:'JetBrains Mono',monospace;font-size:7px;color:#4a2080}
+.m-bar-fill{width:100%;background:#7c3aed;border-radius:2px 2px 0 0;min-height:2px}
+.m-bar-lbl{font-family:'JetBrains Mono',monospace;font-size:7px;color:#94a3b8}
+
+/* ── Notes panel ── */
+.notes-pad-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.notes-pad-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.notes-pad-title{font-size:15px;font-weight:600;color:#1e293b}
+.notes-saved-indicator{font-family:'JetBrains Mono',monospace;font-size:9px;color:#22c55e;opacity:0;transition:opacity .4s}
+.notes-pad-textarea{width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;color:#334155;font-size:14px;font-family:'Source Serif 4',Georgia,serif;outline:none;resize:vertical;line-height:1.7;min-height:140px}
+.notes-pad-textarea:focus{border-color:#7c3aed;background:#fff}
+.notes-pad-textarea::placeholder{color:#94a3b8}
+
+.lesson-note-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.lesson-note-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;gap:8px}
+.lesson-note-title{font-size:13px;font-weight:600;color:#1e293b;line-height:1.3}
+.lesson-note-track{font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 7px;border-radius:10px;white-space:nowrap;flex-shrink:0}
+.lesson-note-body{font-size:13px;color:#475569;line-height:1.7;white-space:pre-wrap}
+.notes-empty{text-align:center;color:#94a3b8;font-style:italic;font-size:14px;padding:32px 0}
 
 /* ── Modal ── */
-#modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;align-items:center;justify-content:center;padding:16px}
+#modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:200;align-items:center;justify-content:center;padding:16px}
 #modal.open{display:flex}
-.modal-wrap{background:#160f2d;border:1px solid #3b1d6e;border-radius:12px;padding:22px 20px;width:100%;max-width:440px;color:#f5f0ff;box-shadow:0 12px 40px rgba(0,0,0,.6);max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
-.modal-close{float:right;background:none;border:none;color:#7c3aed;font-size:26px;cursor:pointer;line-height:1;padding:0;margin-left:10px}
+.modal-wrap{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:22px 20px;width:100%;max-width:440px;color:#1e293b;box-shadow:0 16px 48px rgba(0,0,0,.15);max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.modal-close{float:right;background:none;border:none;color:#94a3b8;font-size:26px;cursor:pointer;line-height:1;padding:0;margin-left:10px}
 .modal-track-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px}
-.modal-lesson-title{font-size:18px;font-weight:600;color:#c4b5fd;line-height:1.3;margin-bottom:8px;padding-right:30px}
-.modal-desc{font-size:13px;color:#a78bfa;line-height:1.6;margin-bottom:16px;font-style:italic}
-.m-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:#a78bfa;margin-bottom:6px;display:block}
+.modal-lesson-title{font-size:18px;font-weight:600;color:#1e293b;line-height:1.3;margin-bottom:8px;padding-right:30px}
+.modal-desc{font-size:13px;color:#64748b;line-height:1.6;margin-bottom:16px;font-style:italic}
+.m-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:#64748b;margin-bottom:6px;display:block}
 .status-pills{display:flex;gap:8px;margin-bottom:16px}
-.s-pill{flex:1;padding:8px 4px;border-radius:6px;background:transparent;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.3px;text-transform:uppercase;cursor:pointer;color:#a78bfa;border:1px solid #3b1d6e;transition:all .15s;white-space:nowrap}
-.m-textarea{width:100%;padding:8px 10px;border:1px solid #3b1d6e;border-radius:6px;background:#1e1540;color:#f5f0ff;font-size:14px;font-family:'Source Serif 4',Georgia,serif;outline:none;resize:vertical;margin-bottom:14px}
-.m-textarea:focus{border-color:#7c3aed}
-.m-textarea::placeholder{color:#4a2080}
+.s-pill{flex:1;padding:8px 4px;border-radius:6px;background:transparent;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.3px;text-transform:uppercase;cursor:pointer;color:#64748b;border:1px solid #e2e8f0;transition:all .15s;white-space:nowrap}
+.m-textarea{width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:6px;background:#f8fafc;color:#334155;font-size:14px;font-family:'Source Serif 4',Georgia,serif;outline:none;resize:vertical;margin-bottom:14px;line-height:1.7}
+.m-textarea:focus{border-color:#7c3aed;background:#fff}
+.m-textarea::placeholder{color:#94a3b8}
 .modal-log-row{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
-.modal-log-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;color:#a78bfa;flex-shrink:0}
-.modal-log-btn{background:#1e1540;border:1px solid #3b1d6e;color:#c4b5fd;border-radius:6px;padding:5px 12px;font-family:'JetBrains Mono',monospace;font-size:10px;cursor:pointer}
-.modal-log-btn:active{background:#2d1b5e}
+.modal-log-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;color:#64748b;flex-shrink:0}
+.modal-log-btn{background:#f1f5f9;border:1px solid #e2e8f0;color:#334155;border-radius:6px;padding:5px 12px;font-family:'JetBrains Mono',monospace;font-size:10px;cursor:pointer}
+.modal-log-btn:active{background:#e2e8f0}
 .modal-time-logged{font-family:'JetBrains Mono',monospace;font-size:10px;color:#d97706}
-.save-btn{width:100%;padding:11px 0;background:#5b21b6;color:#fff;border:none;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.6px;text-transform:uppercase;cursor:pointer}
+.save-btn{width:100%;padding:11px 0;background:#7c3aed;color:#fff;border:none;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.6px;text-transform:uppercase;cursor:pointer}
 </style>
 </head>
 <body>
@@ -173,6 +189,10 @@ body{min-height:100vh;background:linear-gradient(180deg,#1e0a3c 0%,#0c0518 100%)
     <div id="progressContent"></div>
   </div>
 
+  <div class="tab-panel" id="panel-notes">
+    <div id="notesContent"></div>
+  </div>
+
   <!-- Bottom nav -->
   <div class="bottom-nav">
     <button class="nav-btn active" id="nav-tracks" onclick="switchTab('tracks')">
@@ -183,6 +203,9 @@ body{min-height:100vh;background:linear-gradient(180deg,#1e0a3c 0%,#0c0518 100%)
     </button>
     <button class="nav-btn" id="nav-progress" onclick="switchTab('progress')">
       <span class="nav-icon">📊</span>Progress
+    </button>
+    <button class="nav-btn" id="nav-notes" onclick="switchTab('notes')">
+      <span class="nav-icon">📝</span>Notes
     </button>
   </div>
 </div>
@@ -206,7 +229,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 // ═══════════════════════════════════════════
 const TRACKS = [
   {
-    id:'photography', title:'Photography', emoji:'📷', accent:'#7c3aed',
+    id:'photography', title:'Photography', emoji:'📷', accent:'#7c3aed', accentBg:'#ede9fe',
     desc:'From exposure basics to professional technique and creative vision',
     modules:[
       { id:'ph-m1', title:'Camera Foundations', lessons:[
@@ -242,7 +265,7 @@ const TRACKS = [
     ]
   },
   {
-    id:'revenue', title:'Revenue Basics', emoji:'💰', accent:'#d97706',
+    id:'revenue', title:'Revenue Basics', emoji:'💰', accent:'#d97706', accentBg:'#fef3c7',
     desc:'Build financial clarity and create multiple streams of income',
     modules:[
       { id:'rv-m1', title:'Financial Clarity', lessons:[
@@ -282,23 +305,25 @@ const TRACKS = [
 // ═══════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════
-let currentUser  = null;
-let progress     = {};   // {[trackId]: {[lessonId]: {status, notes, completedAt}}}
-let learningLog  = [];   // [{date, minutes, trackId}]
-let dailyGoal    = parseInt(localStorage.getItem('le_daily_goal')||'30');
-let activeTab    = 'tracks';
-let expanded     = {};   // {[moduleId]: bool}
-let modalCtx     = null; // {trackId, lessonId}
-let modalStatus  = 'not_started';
-let modalNewMin  = 0;
-let saveTimer    = null;
+let currentUser   = null;
+let progress      = {};   // {[trackId]: {[lessonId]: {status, notes, completedAt}}}
+let learningLog   = [];   // [{date, minutes, trackId}]
+let generalNotes  = '';   // freeform notepad
+let dailyGoal     = parseInt(localStorage.getItem('le_daily_goal')||'30');
+let activeTab     = 'tracks';
+let expanded      = {};   // {[moduleId]: bool}
+let modalCtx      = null;
+let modalStatus   = 'not_started';
+let modalNewMin   = 0;
+let saveTimer     = null;
+let notesSaveTimer= null;
 
 // ═══════════════════════════════════════════
 // UTILS
 // ═══════════════════════════════════════════
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function todayStr(){ return new Date().toISOString().slice(0,10); }
-function fmtMin(m){ if(!m) return ''; return m>=60?`${Math.floor(m/60)}h ${m%60>0?m%60+'m':''}`:`${m}m`; }
+function fmtMin(m){ if(!m) return ''; return m>=60?`${Math.floor(m/60)}h ${m%60>0?' '+m%60+'m':''}`:`${m}m`; }
 
 function getLessonStatus(trackId, lessonId){
   return progress?.[trackId]?.[lessonId]?.status || 'not_started';
@@ -307,9 +332,9 @@ function getLessonNotes(trackId, lessonId){
   return progress?.[trackId]?.[lessonId]?.notes || '';
 }
 function statusIcon(s){
-  if(s==='completed')  return '<span style="color:#22c55e;font-size:13px">✓</span>';
+  if(s==='completed')   return '<span style="color:#22c55e;font-size:13px">✓</span>';
   if(s==='in_progress') return '<span style="color:#d97706;font-size:12px">◑</span>';
-  return '<span style="color:#2d1b5e;font-size:12px">○</span>';
+  return '<span style="color:#cbd5e1;font-size:12px">○</span>';
 }
 function calcTrackProgress(trackId){
   const track = TRACKS.find(t=>t.id===trackId); if(!track) return {done:0,total:0,pct:0};
@@ -342,8 +367,7 @@ function getNextLesson(){
   for(const track of TRACKS){
     for(const mod of track.modules){
       for(const lesson of mod.lessons){
-        const s=getLessonStatus(track.id,lesson.id);
-        if(s==='in_progress') return {track,mod,lesson};
+        if(getLessonStatus(track.id,lesson.id)==='in_progress') return {track,mod,lesson};
       }
     }
   }
@@ -360,16 +384,19 @@ function getNextLesson(){
 // ═══════════════════════════════════════════
 // STORAGE
 // ═══════════════════════════════════════════
-const lsProgKey = ()=>`le_prog_${currentUser?.id}`;
-const lsLogKey  = ()=>`le_log_${currentUser?.id}`;
+const lsProgKey  = ()=>`le_prog_${currentUser?.id}`;
+const lsLogKey   = ()=>`le_log_${currentUser?.id}`;
+const lsNotesKey = ()=>`le_notes_${currentUser?.id}`;
 
 function saveLocal(){
-  try{ localStorage.setItem(lsProgKey(), JSON.stringify(progress)); }catch(e){}
-  try{ localStorage.setItem(lsLogKey(),  JSON.stringify(learningLog)); }catch(e){}
+  try{ localStorage.setItem(lsProgKey(),  JSON.stringify(progress)); }catch(e){}
+  try{ localStorage.setItem(lsLogKey(),   JSON.stringify(learningLog)); }catch(e){}
+  try{ localStorage.setItem(lsNotesKey(), generalNotes); }catch(e){}
 }
 function loadLocal(){
-  try{ const v=localStorage.getItem(lsProgKey()); if(v) progress=JSON.parse(v); }catch(e){}
-  try{ const v=localStorage.getItem(lsLogKey());  if(v) learningLog=JSON.parse(v); }catch(e){}
+  try{ const v=localStorage.getItem(lsProgKey());  if(v) progress=JSON.parse(v); }catch(e){}
+  try{ const v=localStorage.getItem(lsLogKey());   if(v) learningLog=JSON.parse(v); }catch(e){}
+  try{ const v=localStorage.getItem(lsNotesKey()); if(v) generalNotes=v; }catch(e){}
 }
 
 function setSyncStatus(s){
@@ -386,8 +413,9 @@ async function flushToSupabase(){
   setSyncStatus('saving');
   try{
     const{error}=await sb.from('reading_tracker').upsert([
-      {user_id:currentUser.id, key:'le_progress', data:{progress}, updated_at:new Date().toISOString()},
-      {user_id:currentUser.id, key:'le_log',      data:{log:learningLog}, updated_at:new Date().toISOString()},
+      {user_id:currentUser.id, key:'le_progress', data:{progress},           updated_at:new Date().toISOString()},
+      {user_id:currentUser.id, key:'le_log',      data:{log:learningLog},    updated_at:new Date().toISOString()},
+      {user_id:currentUser.id, key:'le_notes',    data:{notes:generalNotes}, updated_at:new Date().toISOString()},
     ],{onConflict:'user_id,key'});
     setSyncStatus(error?'offline':'');
   }catch(e){ setSyncStatus('offline'); }
@@ -439,12 +467,14 @@ async function startApp(){
   render();
   try{
     const{data}=await sb.from('reading_tracker').select('key,data').eq('user_id',currentUser.id)
-      .in('key',['le_progress','le_log']);
+      .in('key',['le_progress','le_log','le_notes']);
     if(!data) return;
     const pRow=data.find(r=>r.key==='le_progress');
     const lRow=data.find(r=>r.key==='le_log');
-    if(pRow?.data?.progress) progress=pRow.data.progress;
-    if(lRow?.data?.log) learningLog=lRow.data.log;
+    const nRow=data.find(r=>r.key==='le_notes');
+    if(pRow?.data?.progress)   progress=pRow.data.progress;
+    if(lRow?.data?.log)        learningLog=lRow.data.log;
+    if(nRow?.data?.notes!=null) generalNotes=nRow.data.notes;
     saveLocal();
   }catch(e){}
   render();
@@ -460,6 +490,7 @@ function render(){
   renderTracks();
   renderToday();
   renderProgress();
+  renderNotes();
 }
 
 // ── Tracks ──
@@ -470,7 +501,7 @@ function renderTracks(){
     const modulesHtml=track.modules.map((mod,mi)=>{
       const isOpen=!!expanded[mod.id];
       const modDone=mod.lessons.filter(l=>getLessonStatus(track.id,l.id)==='completed').length;
-      const modWip=mod.lessons.filter(l=>getLessonStatus(track.id,l.id)==='in_progress').length;
+      const modWip =mod.lessons.filter(l=>getLessonStatus(track.id,l.id)==='in_progress').length;
       const lessonsHtml=mod.lessons.map(lesson=>{
         const st=getLessonStatus(track.id,lesson.id);
         return `<div class="lesson-row" onclick="openLesson('${track.id}','${lesson.id}')">
@@ -549,9 +580,9 @@ function renderToday(){
       <div class="today-divider"></div>
       <div>
         <div class="today-lbl">Streak</div>
-        <div class="today-big" style="color:${streak>0?'#d97706':'#3b1d6e'}">${streak>0?streak:0}</div>
+        <div class="today-big" style="color:${streak>0?'#d97706':'#cbd5e1'}">${streak>0?streak:0}</div>
         <div class="today-sub">${streak>0?`day${streak!==1?'s':''} in a row`:'Log today to start'}</div>
-        ${streak>0?`<div class="streak-row">🔥 Keep it going — don't break the chain</div>`:''}
+        ${streak>0?`<div class="streak-row">🔥 Keep it going</div>`:''}
       </div>
     </div>
     ${nextHtml}`;
@@ -563,7 +594,6 @@ function renderProgress(){
   const allP=calcAllProgress();
   const streak=calcStreak(), totMin=totalMinutes();
 
-  // Monthly activity (last 6 months)
   const now=new Date();
   const months=[];
   for(let i=5;i>=0;i--){
@@ -576,7 +606,7 @@ function renderProgress(){
   const maxMin=Math.max(...months.map(m=>m.min),1);
   const barsHtml=months.map(m=>`
     <div class="m-bar-col">
-      <div class="m-bar-fill" style="height:${Math.round(m.min/maxMin*48)+4}px;${m.min>0?'':'opacity:.3'}"></div>
+      <div class="m-bar-fill" style="height:${Math.round(m.min/maxMin*48)+4}px;${m.min>0?'':'opacity:.25'}"></div>
       <div class="m-bar-lbl">${m.lbl}</div>
     </div>`).join('');
 
@@ -607,12 +637,65 @@ function renderProgress(){
     </div>`;
 }
 
+// ── Notes ──
+function renderNotes(){
+  const el=document.getElementById('notesContent'); if(!el) return;
+
+  // Collect all lesson notes
+  let allLessonNotes=[];
+  TRACKS.forEach(track=>{
+    track.modules.forEach(mod=>{
+      mod.lessons.forEach(lesson=>{
+        const notes=getLessonNotes(track.id,lesson.id);
+        if(notes.trim()) allLessonNotes.push({track,mod,lesson,notes});
+      });
+    });
+  });
+
+  const lessonNotesHtml = allLessonNotes.length > 0
+    ? allLessonNotes.map(({track,lesson,notes})=>`
+        <div class="lesson-note-card">
+          <div class="lesson-note-head">
+            <div class="lesson-note-title">${esc(lesson.title)}</div>
+            <div class="lesson-note-track" style="color:${track.accent};background:${track.accentBg}">${track.emoji} ${esc(track.title)}</div>
+          </div>
+          <div class="lesson-note-body">${esc(notes)}</div>
+        </div>`).join('')
+    : `<div class="notes-empty">Lesson notes will appear here as you complete lessons.</div>`;
+
+  el.innerHTML=`
+    <div class="notes-pad-card">
+      <div class="notes-pad-head">
+        <div class="notes-pad-title">📓 General Notes</div>
+        <div class="notes-saved-indicator" id="notesSavedInd">Saved</div>
+      </div>
+      <textarea class="notes-pad-textarea" id="generalNotesArea"
+        placeholder="Ideas, reflections, goals, anything you want to remember…"
+        oninput="onGeneralNotesInput()">${esc(generalNotes)}</textarea>
+    </div>
+    <div class="section-lbl" style="margin-top:8px">Lesson Notes</div>
+    ${lessonNotesHtml}`;
+}
+
+function onGeneralNotesInput(){
+  const el=document.getElementById('generalNotesArea');
+  if(!el) return;
+  generalNotes=el.value;
+  saveLocal();
+  clearTimeout(notesSaveTimer);
+  notesSaveTimer=setTimeout(()=>{
+    flushToSupabase();
+    const ind=document.getElementById('notesSavedInd');
+    if(ind){ ind.style.opacity='1'; setTimeout(()=>ind.style.opacity='0',1500); }
+  }, 1000);
+}
+
 // ═══════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════
 function switchTab(tab){
   activeTab=tab;
-  ['tracks','today','progress'].forEach(t=>{
+  ['tracks','today','progress','notes'].forEach(t=>{
     document.getElementById('nav-'+t).classList.toggle('active',t===tab);
     document.getElementById('panel-'+t).classList.toggle('active',t===tab);
   });
@@ -656,7 +739,7 @@ function openLesson(trackId, lessonId){
     <span class="m-lbl">Status</span>
     <div class="status-pills">${pillsHtml}</div>
     <span class="m-lbl">Notes & Takeaways</span>
-    <textarea class="m-textarea" id="mNotes" rows="4" placeholder="Key insights, quotes, things to practice…">${esc(notes)}</textarea>
+    <textarea class="m-textarea" id="mNotes" rows="5" placeholder="Key insights, quotes, things to practice…">${esc(notes)}</textarea>
     <div class="modal-log-row">
       <span class="modal-log-lbl">Log time:</span>
       <button class="modal-log-btn" onclick="addModalMin(15)">+15m</button>
@@ -682,7 +765,7 @@ function selectStatus(s){
   ['not_started','in_progress','completed'].forEach(k=>{
     const pill=document.getElementById('sp_'+k); if(!pill) return;
     const active=k===s;
-    pill.style.border=active?`2px solid ${colors[k]}`:'1px solid #3b1d6e';
+    pill.style.border=active?`2px solid ${colors[k]}`:'1px solid #e2e8f0';
     pill.style.background=active?`${colors[k]}22`:'transparent';
     pill.style.color=active?colors[k]:'';
   });
