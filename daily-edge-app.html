@@ -224,6 +224,15 @@
   .spinner::after { content: ''; width: 24px; height: 24px; border: 3px solid var(--border); border-top-color: var(--purple); border-radius: 50%; animation: spin 0.7s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  
+  /* ── Ink Pads ── */
+  .ink-wrap { margin: 0; }
+  .ink-pad { display:block; width:100%; border-radius:10px; border:1px solid var(--border); background:#f8fafc; touch-action:none; cursor:crosshair; -webkit-user-select:none; user-select:none; }
+  .ink-bar { display:flex; gap:6px; margin-top:5px; }
+  .ink-btn { background:var(--card2); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:11px; padding:4px 10px; cursor:pointer; font-family:inherit; }
+  .ink-active { background:var(--purple)!important; border-color:var(--purple)!important; color:#fff!important; }
+  .ink-clr { margin-left:auto; color:var(--red); border-color:var(--red); }
+
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 </style>
@@ -270,8 +279,8 @@
     <span class="date-nav-label" id="todayDateLabel"></span>
     <button class="date-nav-btn" onclick="changeDay(1)">›</button>
   </div>
-  <div class="card"><div class="card-title">Daily Affirmation</div><textarea id="affirmation" rows="3" placeholder="I am..."></textarea></div>
-  <div class="card"><div class="card-title">Notes</div><textarea id="notes" rows="4" placeholder="Quick notes for today..."></textarea></div>
+  <div class="card"><div class="card-title">Daily Affirmation</div><div class="ink-wrap" id="wrap-affirmation"><canvas class="ink-pad" id="affirmation" data-h="140"></canvas><div class="ink-bar"><button class="ink-btn ink-active" id="ibpen-affirmation" onclick="inkMode('affirmation','pen')">✏ Pen</button><button class="ink-btn" id="ibers-affirmation" onclick="inkMode('affirmation','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" onclick="inkClear('affirmation')">✕ Clear</button></div></div></div>
+  <div class="card"><div class="card-title">Notes</div><div class="ink-wrap" id="wrap-notes"><canvas class="ink-pad" id="notes" data-h="180"></canvas><div class="ink-bar"><button class="ink-btn ink-active" id="ibpen-notes" onclick="inkMode('notes','pen')">✏ Pen</button><button class="ink-btn" id="ibers-notes" onclick="inkMode('notes','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" onclick="inkClear('notes')">✕ Clear</button></div></div></div>
   <div class="card">
     <div class="card-title">To-Do List</div>
     <div class="todo-input-row"><input type="text" id="todoInput" placeholder="Add a task..." onkeydown="if(event.key==='Enter')addTodo()"><button class="btn-add" onclick="addTodo()">+</button></div>
@@ -314,14 +323,14 @@
   </div>
   <div class="card">
     <div class="card-title">Today I Am Grateful For...</div>
-    <div class="grat-row"><span class="grat-num">1</span><textarea id="grat1" rows="2" placeholder="I'm grateful for..."></textarea></div>
-    <div class="grat-row"><span class="grat-num">2</span><textarea id="grat2" rows="2" placeholder="I'm grateful for..."></textarea></div>
-    <div class="grat-row"><span class="grat-num">3</span><textarea id="grat3" rows="2" placeholder="I'm grateful for..."></textarea></div>
+    <div class="grat-row"><span class="grat-num">1</span><div class="ink-wrap" id="wrap-grat1"><canvas class="ink-pad" id="grat1" data-h="110"></canvas><div class="ink-bar"><button class="ink-btn ink-active" id="ibpen-grat1" onclick="inkMode('grat1','pen')">✏ Pen</button><button class="ink-btn" id="ibers-grat1" onclick="inkMode('grat1','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" onclick="inkClear('grat1')">✕ Clear</button></div></div></div>
+    <div class="grat-row"><span class="grat-num">2</span><div class="ink-wrap" id="wrap-grat2"><canvas class="ink-pad" id="grat2" data-h="110"></canvas><div class="ink-bar"><button class="ink-btn ink-active" id="ibpen-grat2" onclick="inkMode('grat2','pen')">✏ Pen</button><button class="ink-btn" id="ibers-grat2" onclick="inkMode('grat2','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" onclick="inkClear('grat2')">✕ Clear</button></div></div></div>
+    <div class="grat-row"><span class="grat-num">3</span><div class="ink-wrap" id="wrap-grat3"><canvas class="ink-pad" id="grat3" data-h="110"></canvas><div class="ink-bar"><button class="ink-btn ink-active" id="ibpen-grat3" onclick="inkMode('grat3','pen')">✏ Pen</button><button class="ink-btn" id="ibers-grat3" onclick="inkMode('grat3','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" onclick="inkClear('grat3')">✕ Clear</button></div></div></div>
   </div>
-  <div class="card"><div class="prompt-label">This good thing happened today and I appreciate it because:</div><textarea id="goodThing" rows="3" placeholder="Something positive..."></textarea></div>
-  <div class="card"><div class="prompt-label">This not-so-good thing happened and this is how I handled it:</div><textarea id="badThing" rows="3" placeholder="A challenge and my response..."></textarea></div>
-  <div class="card"><div class="prompt-label">This thing made me happy today:</div><textarea id="happyThing" rows="3" placeholder="What brought joy..."></textarea></div>
-  <div class="card"><div class="prompt-label">Today, I discovered this about myself:</div><textarea id="discovery" rows="3" placeholder="A new insight..."></textarea></div>
+  <div class="card"><div class="prompt-label">This good thing happened today and I appreciate it because:</div><div class="ink-wrap" id="wrap-goodThing"><canvas class="ink-pad" id="goodThing" data-h="140"></canvas><div class="ink-bar"><button class="ink-btn ink-active" id="ibpen-goodThing" onclick="inkMode('goodThing','pen')">✏ Pen</button><button class="ink-btn" id="ibers-goodThing" onclick="inkMode('goodThing','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" onclick="inkClear('goodThing')">✕ Clear</button></div></div></div>
+  <div class="card"><div class="prompt-label">This not-so-good thing happened and this is how I handled it:</div><div class="ink-wrap" id="wrap-badThing"><canvas class="ink-pad" id="badThing" data-h="140"></canvas><div class="ink-bar"><button class="ink-btn ink-active" id="ibpen-badThing" onclick="inkMode('badThing','pen')">✏ Pen</button><button class="ink-btn" id="ibers-badThing" onclick="inkMode('badThing','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" onclick="inkClear('badThing')">✕ Clear</button></div></div></div>
+  <div class="card"><div class="prompt-label">This thing made me happy today:</div><div class="ink-wrap" id="wrap-happyThing"><canvas class="ink-pad" id="happyThing" data-h="140"></canvas><div class="ink-bar"><button class="ink-btn ink-active" id="ibpen-happyThing" onclick="inkMode('happyThing','pen')">✏ Pen</button><button class="ink-btn" id="ibers-happyThing" onclick="inkMode('happyThing','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" onclick="inkClear('happyThing')">✕ Clear</button></div></div></div>
+  <div class="card"><div class="prompt-label">Today, I discovered this about myself:</div><div class="ink-wrap" id="wrap-discovery"><canvas class="ink-pad" id="discovery" data-h="140"></canvas><div class="ink-bar"><button class="ink-btn ink-active" id="ibpen-discovery" onclick="inkMode('discovery','pen')">✏ Pen</button><button class="ink-btn" id="ibers-discovery" onclick="inkMode('discovery','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" onclick="inkClear('discovery')">✕ Clear</button></div></div></div>
 </div>
 
 <!-- WEEKLY -->
@@ -341,10 +350,10 @@
   </div>
   <div class="card">
     <div class="card-title">Weekly Improvement Review</div>
-    <div class="review-row"><div class="review-q">What improved with least effort?</div><textarea id="wir1" rows="2" placeholder="Which area gained momentum naturally?"></textarea></div>
-    <div class="review-row"><div class="review-q">What declined quietly?</div><textarea id="wir2" rows="2" placeholder="Which area lost ground without notice?"></textarea></div>
-    <div class="review-row"><div class="review-q">Next week improves if I:</div><textarea id="wir3" rows="2" placeholder="One specific action..."></textarea></div>
-    <div class="review-row"><div class="review-q">Identified repeatable actions:</div><textarea id="wir4" rows="2" placeholder="What pattern can I systematize?"></textarea></div>
+    <div class="review-row"><div class="review-q">What improved with least effort?</div><div class="ink-wrap" id="wrap-wir1"><canvas class="ink-pad" id="wir1" data-h="110"></canvas><div class="ink-bar"><button class="ink-btn ink-active" id="ibpen-wir1" onclick="inkMode('wir1','pen')">✏ Pen</button><button class="ink-btn" id="ibers-wir1" onclick="inkMode('wir1','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" onclick="inkClear('wir1')">✕ Clear</button></div></div></div>
+    <div class="review-row"><div class="review-q">What declined quietly?</div><div class="ink-wrap" id="wrap-wir2"><canvas class="ink-pad" id="wir2" data-h="110"></canvas><div class="ink-bar"><button class="ink-btn ink-active" id="ibpen-wir2" onclick="inkMode('wir2','pen')">✏ Pen</button><button class="ink-btn" id="ibers-wir2" onclick="inkMode('wir2','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" onclick="inkClear('wir2')">✕ Clear</button></div></div></div>
+    <div class="review-row"><div class="review-q">Next week improves if I:</div><div class="ink-wrap" id="wrap-wir3"><canvas class="ink-pad" id="wir3" data-h="110"></canvas><div class="ink-bar"><button class="ink-btn ink-active" id="ibpen-wir3" onclick="inkMode('wir3','pen')">✏ Pen</button><button class="ink-btn" id="ibers-wir3" onclick="inkMode('wir3','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" onclick="inkClear('wir3')">✕ Clear</button></div></div></div>
+    <div class="review-row"><div class="review-q">Identified repeatable actions:</div><div class="ink-wrap" id="wrap-wir4"><canvas class="ink-pad" id="wir4" data-h="110"></canvas><div class="ink-bar"><button class="ink-btn ink-active" id="ibpen-wir4" onclick="inkMode('wir4','pen')">✏ Pen</button><button class="ink-btn" id="ibers-wir4" onclick="inkMode('wir4','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" onclick="inkClear('wir4')">✕ Clear</button></div></div></div>
   </div>
 </div>
 
@@ -360,10 +369,10 @@
   <div class="card"><div class="card-title">Keystone Habits — Quality Scoring</div><div style="overflow-x:auto"><table class="quality-table"><thead><tr><th>Area</th><th>Habit</th><th>Criteria</th><th>Days<br>0-7</th><th>Qual<br>0-7</th></tr></thead><tbody id="qualityTableBody"></tbody></table></div></div>
   <div class="card">
     <div class="card-title">Weekly Improvement Review</div>
-    <div class="review-row"><div class="review-q">What improved with least effort?</div><div class="review-p">Which area gained momentum naturally?</div><textarea id="pir1" rows="2" placeholder="Answer..."></textarea></div>
-    <div class="review-row"><div class="review-q">What declined quietly?</div><div class="review-p">Which area lost ground without notice?</div><textarea id="pir2" rows="2" placeholder="Answer..."></textarea></div>
-    <div class="review-row"><div class="review-q">Next week improves if I:</div><div class="review-p">One specific action moves the needle most</div><textarea id="pir3" rows="2" placeholder="Answer..."></textarea></div>
-    <div class="review-row" style="margin-bottom:0"><div class="review-q">Identified repeatable actions?</div><div class="review-p">What pattern can I systematize?</div><textarea id="pir4" rows="2" placeholder="Answer..."></textarea></div>
+    <div class="review-row"><div class="review-q">What improved with least effort?</div><div class="review-p">Which area gained momentum naturally?</div><div class="ink-wrap" id="wrap-pir1"><canvas class="ink-pad" id="pir1" data-h="110"></canvas><div class="ink-bar"><button class="ink-btn ink-active" id="ibpen-pir1" onclick="inkMode('pir1','pen')">✏ Pen</button><button class="ink-btn" id="ibers-pir1" onclick="inkMode('pir1','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" onclick="inkClear('pir1')">✕ Clear</button></div></div></div>
+    <div class="review-row"><div class="review-q">What declined quietly?</div><div class="review-p">Which area lost ground without notice?</div><div class="ink-wrap" id="wrap-pir2"><canvas class="ink-pad" id="pir2" data-h="110"></canvas><div class="ink-bar"><button class="ink-btn ink-active" id="ibpen-pir2" onclick="inkMode('pir2','pen')">✏ Pen</button><button class="ink-btn" id="ibers-pir2" onclick="inkMode('pir2','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" onclick="inkClear('pir2')">✕ Clear</button></div></div></div>
+    <div class="review-row"><div class="review-q">Next week improves if I:</div><div class="review-p">One specific action moves the needle most</div><div class="ink-wrap" id="wrap-pir3"><canvas class="ink-pad" id="pir3" data-h="110"></canvas><div class="ink-bar"><button class="ink-btn ink-active" id="ibpen-pir3" onclick="inkMode('pir3','pen')">✏ Pen</button><button class="ink-btn" id="ibers-pir3" onclick="inkMode('pir3','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" onclick="inkClear('pir3')">✕ Clear</button></div></div></div>
+    <div class="review-row" style="margin-bottom:0"><div class="review-q">Identified repeatable actions?</div><div class="review-p">What pattern can I systematize?</div><div class="ink-wrap" id="wrap-pir4"><canvas class="ink-pad" id="pir4" data-h="110"></canvas><div class="ink-bar"><button class="ink-btn ink-active" id="ibpen-pir4" onclick="inkMode('pir4','pen')">✏ Pen</button><button class="ink-btn" id="ibers-pir4" onclick="inkMode('pir4','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" onclick="inkClear('pir4')">✕ Clear</button></div></div></div>
   </div>
 </div>
 
@@ -578,6 +587,7 @@ function startApp() {
   buildSchedule();
   updateDateLabels();
   loadConfig();
+  setTimeout(initAllInkPads, 100);
 }
 
 function teardownListeners() {
@@ -715,8 +725,8 @@ function scheduleConfigSave() {
 // CAPTURE FROM UI → dayData
 // ══════════════════════════════════════
 function captureDay() {
-  dayData.affirmation    = v('affirmation');
-  dayData.notes          = v('notes');
+  dayData.affirmation    = getInkData('affirmation');
+  dayData.notes          = getInkData('notes');
   dayData.mealB          = v('mealB');
   dayData.mealL          = v('mealL');
   dayData.mealD          = v('mealD');
@@ -724,30 +734,30 @@ function captureDay() {
   dayData.reflectWater   = v('reflectWater');
   dayData.reflectExercise= v('reflectExercise');
   dayData.reflectMood    = v('reflectMood');
-  dayData.grat1          = v('grat1');
-  dayData.grat2          = v('grat2');
-  dayData.grat3          = v('grat3');
-  dayData.goodThing      = v('goodThing');
-  dayData.badThing       = v('badThing');
-  dayData.happyThing     = v('happyThing');
-  dayData.discovery      = v('discovery');
+  dayData.grat1          = getInkData('grat1');
+  dayData.grat2          = getInkData('grat2');
+  dayData.grat3          = getInkData('grat3');
+  dayData.goodThing      = getInkData('goodThing');
+  dayData.badThing       = getInkData('badThing');
+  dayData.happyThing     = getInkData('happyThing');
+  dayData.discovery      = getInkData('discovery');
   dayData.schedule       = [];
   document.querySelectorAll('.sched-input').forEach(i => dayData.schedule.push(i.value));
   scheduleDaySave();
 }
 
 function captureWeekReview() {
-  weekData.wir1 = v('wir1'); weekData.wir2 = v('wir2');
-  weekData.wir3 = v('wir3'); weekData.wir4 = v('wir4');
+  weekData.wir1 = getInkData('wir1'); weekData.wir2 = getInkData('wir2');
+  weekData.wir3 = getInkData('wir3'); weekData.wir4 = getInkData('wir4');
   weekData.constraint = v('constraint'); weekData.lever = v('lever');
-  weekData.pir1 = v('pir1'); weekData.pir2 = v('pir2');
-  weekData.pir3 = v('pir3'); weekData.pir4 = v('pir4');
+  weekData.pir1 = getInkData('pir1'); weekData.pir2 = getInkData('pir2');
+  weekData.pir3 = getInkData('pir3'); weekData.pir4 = getInkData('pir4');
   scheduleWeekSave();
 }
 
 document.addEventListener('input', e => {
-  const dayFields = ['affirmation','notes','mealB','mealL','mealD','reflectWater','reflectExercise','reflectMood','grat1','grat2','grat3','goodThing','badThing','happyThing','discovery'];
-  const weekFields = ['wir1','wir2','wir3','wir4','constraint','lever','pir1','pir2','pir3','pir4'];
+  const dayFields = ['mealB','mealL','mealD','reflectWater','reflectExercise','reflectMood'];
+  const weekFields = ['constraint','lever'];
   if (dayFields.includes(e.target.id) || e.target.classList.contains('sched-input')) captureDay();
   if (weekFields.includes(e.target.id)) captureWeekReview();
 });
@@ -756,21 +766,21 @@ document.addEventListener('input', e => {
 // RENDER DAY
 // ══════════════════════════════════════
 function renderDay() {
-  setv('affirmation', dayData.affirmation);
-  setv('notes', dayData.notes);
+  setInkData('affirmation', dayData.affirmation);
+  setInkData('notes', dayData.notes);
   setv('mealB', dayData.mealB);
   setv('mealL', dayData.mealL);
   setv('mealD', dayData.mealD);
   setv('reflectWater', dayData.reflectWater);
   setv('reflectExercise', dayData.reflectExercise);
   setv('reflectMood', dayData.reflectMood);
-  setv('grat1', dayData.grat1);
-  setv('grat2', dayData.grat2);
-  setv('grat3', dayData.grat3);
-  setv('goodThing', dayData.goodThing);
-  setv('badThing', dayData.badThing);
-  setv('happyThing', dayData.happyThing);
-  setv('discovery', dayData.discovery);
+  setInkData('grat1', dayData.grat1);
+  setInkData('grat2', dayData.grat2);
+  setInkData('grat3', dayData.grat3);
+  setInkData('goodThing', dayData.goodThing);
+  setInkData('badThing', dayData.badThing);
+  setInkData('happyThing', dayData.happyThing);
+  setInkData('discovery', dayData.discovery);
   document.querySelectorAll('.sched-input').forEach((inp,i) => inp.value = (dayData.schedule||[])[i]||'');
   document.querySelectorAll('.ftype-btn').forEach(b => b.classList.toggle('active', b.textContent === dayData.fitnessType));
   renderTodos(); renderFitness(); renderWater(); updateStreak();
@@ -984,8 +994,8 @@ function toggleHabit(ai, di, checked) {
 }
 
 function renderWeekReview() {
-  setv('wir1', weekData.wir1); setv('wir2', weekData.wir2);
-  setv('wir3', weekData.wir3); setv('wir4', weekData.wir4);
+  setInkData('wir1', weekData.wir1); setInkData('wir2', weekData.wir2);
+  setInkData('wir3', weekData.wir3); setInkData('wir4', weekData.wir4);
 }
 
 // ══════════════════════════════════════
@@ -1031,8 +1041,8 @@ function saveQual(i, field, val) {
 
 function renderProgressReview() {
   setv('constraint', weekData.constraint); setv('lever', weekData.lever);
-  setv('pir1', weekData.pir1); setv('pir2', weekData.pir2);
-  setv('pir3', weekData.pir3); setv('pir4', weekData.pir4);
+  setInkData('pir1', weekData.pir1); setInkData('pir2', weekData.pir2);
+  setInkData('pir3', weekData.pir3); setInkData('pir4', weekData.pir4);
 }
 
 // ══════════════════════════════════════
@@ -1243,6 +1253,121 @@ function setv(id, val, isText) {
 }
 function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function escAttr(s) { return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+// ══════════════════════════════════════
+// INK PADS (Apple Pencil drawing)
+// ══════════════════════════════════════
+const INK_BG = '#f8fafc';
+const INK_COLOR = '#0f172a';
+const inkS = {}; // per-canvas state
+
+function initAllInkPads() {
+  document.querySelectorAll('.ink-pad').forEach(c => initInkPad(c));
+}
+
+function initInkPad(canvas) {
+  const id = canvas.id;
+  const h  = parseInt(canvas.dataset.h) || 120;
+  const dpr = window.devicePixelRatio || 1;
+  const w   = canvas.parentElement?.offsetWidth || 320;
+  canvas.width  = w  * dpr;
+  canvas.height = h  * dpr;
+  canvas.style.width  = w  + 'px';
+  canvas.style.height = h  + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.fillStyle = INK_BG;
+  ctx.fillRect(0, 0, w, h);
+  inkS[id] = { tool:'pen', down:false, lx:0, ly:0, dpr, w, h };
+
+  canvas.addEventListener('pointerdown', e => {
+    inkS[id].down = true;
+    canvas.setPointerCapture(e.pointerId);
+    const r = canvas.getBoundingClientRect();
+    const x = (e.clientX - r.left), y = (e.clientY - r.top);
+    inkS[id].lx = x; inkS[id].ly = y;
+    const ctx2 = canvas.getContext('2d');
+    ctx2.beginPath();
+    if (inkS[id].tool === 'eraser') {
+      ctx2.arc(x, y, 10, 0, Math.PI*2);
+      ctx2.fillStyle = INK_BG; ctx2.fill();
+    } else {
+      ctx2.arc(x, y, 1, 0, Math.PI*2);
+      ctx2.fillStyle = INK_COLOR; ctx2.fill();
+    }
+  }, { passive: false });
+
+  canvas.addEventListener('pointermove', e => {
+    if (!inkS[id].down) return;
+    e.preventDefault();
+    const r  = canvas.getBoundingClientRect();
+    const x  = (e.clientX - r.left), y = (e.clientY - r.top);
+    const ctx2 = canvas.getContext('2d');
+    ctx2.beginPath();
+    ctx2.moveTo(inkS[id].lx, inkS[id].ly);
+    ctx2.lineTo(x, y);
+    if (inkS[id].tool === 'eraser') {
+      ctx2.strokeStyle = INK_BG; ctx2.lineWidth = 20;
+    } else {
+      ctx2.strokeStyle = INK_COLOR; ctx2.lineWidth = 2;
+    }
+    ctx2.lineCap = 'round'; ctx2.lineJoin = 'round';
+    ctx2.stroke();
+    inkS[id].lx = x; inkS[id].ly = y;
+  }, { passive: false });
+
+  function endStroke() {
+    if (!inkS[id].down) return;
+    inkS[id].down = false;
+    const DAY_IDS  = ['affirmation','notes','grat1','grat2','grat3','goodThing','badThing','happyThing','discovery'];
+    const WEEK_IDS = ['wir1','wir2','wir3','wir4','pir1','pir2','pir3','pir4'];
+    if (DAY_IDS.includes(id))  captureDay();
+    if (WEEK_IDS.includes(id)) captureWeekReview();
+  }
+  canvas.addEventListener('pointerup',     endStroke);
+  canvas.addEventListener('pointercancel', endStroke);
+  canvas.addEventListener('pointerleave',  endStroke);
+}
+
+function getInkData(id) {
+  const c = document.getElementById(id);
+  if (!c || !c.getContext) return '';
+  return c.toDataURL('image/png');
+}
+
+function setInkData(id, dataUrl) {
+  const c = document.getElementById(id);
+  if (!c || !c.getContext) return;
+  if (!inkS[id]) initInkPad(c);
+  const ctx = c.getContext('2d');
+  const { w, h } = inkS[id];
+  ctx.fillStyle = INK_BG;
+  ctx.fillRect(0, 0, w, h);
+  if (!dataUrl) return;
+  const img = new Image();
+  img.onload = () => ctx.drawImage(img, 0, 0, w, h);
+  img.src = dataUrl;
+}
+
+function inkMode(id, tool) {
+  if (!inkS[id]) return;
+  inkS[id].tool = tool;
+  document.getElementById('ibpen-'+id)?.classList.toggle('ink-active', tool==='pen');
+  document.getElementById('ibers-'+id)?.classList.toggle('ink-active', tool==='eraser');
+}
+
+function inkClear(id) {
+  const c = document.getElementById(id);
+  if (!c || !inkS[id]) return;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = INK_BG;
+  ctx.fillRect(0, 0, inkS[id].w, inkS[id].h);
+  const DAY_IDS  = ['affirmation','notes','grat1','grat2','grat3','goodThing','badThing','happyThing','discovery'];
+  const WEEK_IDS = ['wir1','wir2','wir3','wir4','pir1','pir2','pir3','pir4'];
+  if (DAY_IDS.includes(id))  captureDay();
+  if (WEEK_IDS.includes(id)) captureWeekReview();
+}
+
 </script>
 </body>
 </html>
