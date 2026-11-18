@@ -174,6 +174,62 @@ textarea.m-input{color:#f5f0ff}
 .rg-log-btn:active,.rg-log-btn:hover{background:#2d1b5e}
 .rg-streak{margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#a78bfa;display:flex;align-items:center;gap:5px}
 .rg-goal-link{background:none;border:none;color:#6d3aad;font-family:'JetBrains Mono',monospace;font-size:9px;cursor:pointer;padding:0;text-decoration:underline}
+
+/* ── Light theme ── */
+body.light{background:#f5f1ff;color:#1e0a3c}
+body.light .ledger-title{color:#5b21b6}
+body.light .ledger-stats{color:#6d28d9}
+body.light .goal-track{background:#ddd6fe}
+body.light .tab-bar{background:#ede9fe}
+body.light .tab-btn{color:#6d28d9}
+body.light .tab-btn.active{background:#5b21b6;color:#fff}
+body.light #searchInput{background:#fff;border-color:#c4b5fd;color:#1e0a3c}
+body.light #searchInput::placeholder{color:#a78bfa}
+body.light .export-btn{border-color:#c4b5fd;color:#6d28d9;background:#fff}
+body.light .curr-card{background:#fff;border-color:#ddd6fe}
+body.light .curr-month{color:#7c3aed}
+body.light .curr-book-title{color:#3b0764}
+body.light .curr-book-author{color:#7c3aed}
+body.light .disc-filter{background:#fff;border-color:#c4b5fd;color:#1e0a3c}
+body.light .disc-filter::placeholder{color:#a78bfa}
+body.light .disc-item{background:#fff;border-color:#ddd6fe}
+body.light .disc-title{color:#3b0764}
+body.light .disc-author{color:#7c3aed}
+body.light .disc-empty{color:#a78bfa}
+body.light .modal-card{background:#fff;border-color:#c4b5fd;color:#1e0a3c}
+body.light .modal-title{color:#3b0764}
+body.light .modal-author{color:#6d28d9}
+body.light .modal-close{color:#7c3aed}
+body.light .m-label{color:#6d28d9}
+body.light .m-input{background:#f5f1ff;border-color:#c4b5fd;color:#1e0a3c}
+body.light .m-input::placeholder{color:#a78bfa}
+body.light textarea.m-input{color:#1e0a3c}
+body.light .s-pill{color:#6d28d9;border-color:#c4b5fd}
+body.light .star-btn{color:#c4b5fd}
+body.light .star-btn.on{color:#d97706}
+body.light .v-status-lbl{color:#6d28d9}
+body.light .v-pages{color:#6d28d9}
+body.light .v-notes{color:#3b0764;border-color:#c4b5fd}
+body.light .v-dates{color:#7c3aed}
+body.light .v-star{color:#c4b5fd}
+body.light .ac-results{background:#fff;border-color:#c4b5fd}
+body.light .ac-item{border-color:#ede9fe}
+body.light .ac-item:hover,.ac-item:active{background:#f5f1ff}
+body.light .ac-item-title{color:#3b0764}
+body.light .ac-item-author{color:#6d28d9}
+body.light .empty-shelf{color:#a78bfa}
+body.light .rg-card{background:#fff;border-color:#ddd6fe}
+body.light .rg-divider{background:#ede9fe}
+body.light .rg-lbl{color:#7c3aed}
+body.light .rg-sub{color:#6d28d9}
+body.light .rg-nudge{color:#3b0764;border-color:#ddd6fe}
+body.light .rg-log-btn{background:#f5f1ff;border-color:#c4b5fd;color:#3b0764}
+body.light .rg-log-btn:hover,.rg-log-btn:active{background:#ede9fe}
+body.light .rg-streak{color:#6d28d9}
+body.light .rg-goal-link{color:#7c3aed}
+body.light .save-btn:disabled{background:#ddd6fe;color:#a78bfa}
+body.light .group-label{color:#6d28d9}
+body.light #modal{background:rgba(100,80,150,.4)}
 </style>
 </head>
 <body>
@@ -197,7 +253,10 @@ textarea.m-input{color:#f5f0ff}
   </div>
   <div class="ledger-meta">
     <div class="ledger-stats" id="ledgerStats"></div>
-    <div class="sync-dot" id="syncDot"></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
+      <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle theme" style="background:none;border:1px solid #3b1d6e;border-radius:6px;color:#a78bfa;font-size:11px;padding:3px 9px;cursor:pointer;font-family:'JetBrains Mono',monospace;letter-spacing:.3px">☀ Light</button>
+      <div class="sync-dot" id="syncDot"></div>
+    </div>
   </div>
 
   <!-- Goal bar -->
@@ -783,7 +842,7 @@ function pickDisc(i){
 }
 
 // ── CSV Export ──
-function exportCSV(){
+function buildCSV(){
   const header=['Title','Author','Status','Rating','Pages','Current Page','Key Takeaway','Notes','Added','Finished'];
   const rows=books.map(b=>[
     b.title, b.author, b.status, b.rating||0,
@@ -792,15 +851,33 @@ function exportCSV(){
     b.addedAt?new Date(b.addedAt).toLocaleDateString():'',
     b.finishedAt?new Date(b.finishedAt).toLocaleDateString():'',
   ].map(v=>`"${String(v).replace(/"/g,'""')}"`));
-  const csv=[header.map(h=>`"${h}"`).join(','),...rows.map(r=>r.join(','))].join('\n');
+  return [header.map(h=>`"${h}"`).join(','),...rows.map(r=>r.join(','))].join('\n');
+}
+
+async function exportCSV(){
+  const csv=buildCSV();
+  const filename=`reading-ledger-${new Date().toISOString().slice(0,10)}.csv`;
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+
+  // iOS / modern mobile: use Web Share API (opens native share sheet → Files, AirDrop, Mail, etc.)
+  if(navigator.share){
+    try{
+      const file=new File([blob],filename,{type:'text/csv'});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){
+        await navigator.share({title:'Reading Ledger Export',files:[file]});
+        return;
+      }
+      // canShare not supported or denied — fall through to share text
+      await navigator.share({title:'Reading Ledger',text:csv});
+      return;
+    } catch(e){ if(e.name==='AbortError') return; /* user cancelled */ }
+  }
+
+  // Desktop: trigger download
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
-  a.href=url;
-  a.setAttribute('download',`reading-ledger-${new Date().toISOString().slice(0,10)}.csv`);
-  a.style.display='none';
-  document.body.appendChild(a);
-  a.click();
+  a.href=url; a.setAttribute('download',filename); a.style.display='none';
+  document.body.appendChild(a); a.click();
   setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); },100);
 }
 
@@ -1080,6 +1157,26 @@ document.addEventListener('click',e=>{
   if(!e.target.closest('.ac-wrap'))
     document.getElementById('kindleResults')?.classList.remove('show');
 });
+
+function toggleTheme(){
+  const isLight = document.body.classList.toggle('light');
+  const btn = document.getElementById('themeToggleBtn');
+  if(btn) btn.textContent = isLight ? '🌙 Dark' : '☀ Light';
+  if(btn) btn.style.borderColor = isLight ? '#c4b5fd' : '#3b1d6e';
+  if(btn) btn.style.color = isLight ? '#5b21b6' : '#a78bfa';
+  localStorage.setItem('rt_theme', isLight ? 'light' : 'dark');
+}
+// Apply saved theme on load
+(function(){
+  if(localStorage.getItem('rt_theme')==='light'){
+    document.body.classList.add('light');
+    document.addEventListener('DOMContentLoaded',()=>{
+      const btn=document.getElementById('themeToggleBtn');
+      if(btn){btn.textContent='🌙 Dark';btn.style.borderColor='#c4b5fd';btn.style.color='#5b21b6';}
+    });
+  }
+})();
+
 </script>
 </body>
 </html>
