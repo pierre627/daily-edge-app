@@ -1291,15 +1291,18 @@ function initInkPad(canvas) {
   ctx.scale(dpr, dpr);
   ctx.fillStyle = INK_BG;
   ctx.fillRect(0, 0, w, h);
-  // lx/ly = last point; mx/my = midpoint for bezier smoothing
   inkS[id] = { tool:'pen', down:false, lx:0, ly:0, mx:0, my:0, dpr, w, h };
 
-  canvas.addEventListener('pointerdown', e => {
+  function getXY(e) {
+    const r = canvas.getBoundingClientRect();
+    const t = e.touches ? e.touches[0] : e;
+    return { x: t.clientX - r.left, y: t.clientY - r.top };
+  }
+
+  function startDraw(e) {
     e.preventDefault();
     inkS[id].down = true;
-    canvas.setPointerCapture(e.pointerId);
-    const r = canvas.getBoundingClientRect();
-    const x = e.clientX - r.left, y = e.clientY - r.top;
+    const { x, y } = getXY(e);
     inkS[id].lx = x; inkS[id].ly = y;
     inkS[id].mx = x; inkS[id].my = y;
     const ctx2 = canvas.getContext('2d');
@@ -1311,23 +1314,21 @@ function initInkPad(canvas) {
       ctx2.arc(x, y, 1.5, 0, Math.PI*2);
       ctx2.fillStyle = INK_COLOR; ctx2.fill();
     }
-  }, { passive: false });
+  }
 
-  canvas.addEventListener('pointermove', e => {
+  function moveDraw(e) {
     if (!inkS[id].down) return;
     e.preventDefault();
-    const r = canvas.getBoundingClientRect();
     const ctx2 = canvas.getContext('2d');
-    // Use coalesced events for sub-frame Apple Pencil precision
-    const events = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
-    for (const ev of events) {
-      const x = ev.clientX - r.left, y = ev.clientY - r.top;
+    const pts = e.touches ? Array.from(e.touches).slice(0,1) : [e];
+    for (const t of pts) {
+      const r = canvas.getBoundingClientRect();
+      const x = t.clientX - r.left, y = t.clientY - r.top;
       if (inkS[id].tool === 'eraser') {
         ctx2.beginPath();
         ctx2.arc(x, y, 12, 0, Math.PI*2);
         ctx2.fillStyle = INK_BG; ctx2.fill();
       } else {
-        // Bezier curve through midpoints for smooth strokes
         const mx = (inkS[id].lx + x) / 2;
         const my = (inkS[id].ly + y) / 2;
         ctx2.beginPath();
@@ -1341,17 +1342,25 @@ function initInkPad(canvas) {
       }
       inkS[id].lx = x; inkS[id].ly = y;
     }
-  }, { passive: false });
+  }
 
-  function endStroke() {
+  function endDraw(e) {
     if (!inkS[id].down) return;
+    e.preventDefault();
     inkS[id].down = false;
     scheduleInkSave(id);
   }
-  // NOTE: pointerleave intentionally NOT used — setPointerCapture keeps
-  // events routing to this canvas; adding pointerleave would cut strokes short.
-  canvas.addEventListener('pointerup',     endStroke);
-  canvas.addEventListener('pointercancel', endStroke);
+
+  // Touch events — most reliable for Apple Pencil on iOS Safari
+  canvas.addEventListener('touchstart',  startDraw, { passive: false });
+  canvas.addEventListener('touchmove',   moveDraw,  { passive: false });
+  canvas.addEventListener('touchend',    endDraw,   { passive: false });
+  canvas.addEventListener('touchcancel', endDraw,   { passive: false });
+
+  // Pointer events as fallback for non-touch (mouse/trackpad on desktop)
+  canvas.addEventListener('pointerdown', e => { if (e.pointerType === 'mouse') startDraw(e); }, { passive: false });
+  canvas.addEventListener('pointermove', e => { if (e.pointerType === 'mouse') moveDraw(e);  }, { passive: false });
+  canvas.addEventListener('pointerup',   e => { if (e.pointerType === 'mouse') endDraw(e);   }, { passive: false });
 }
 
 function getInkData(id) {
