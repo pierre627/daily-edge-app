@@ -1267,6 +1267,17 @@ function initAllInkPads() {
   document.querySelectorAll('.ink-pad').forEach(c => initInkPad(c));
 }
 
+const inkSaveTimers = {};
+function scheduleInkSave(id) {
+  clearTimeout(inkSaveTimers[id]);
+  inkSaveTimers[id] = setTimeout(() => {
+    const DAY_IDS  = ['affirmation','notes','grat1','grat2','grat3','goodThing','badThing','happyThing','discovery'];
+    const WEEK_IDS = ['wir1','wir2','wir3','wir4','pir1','pir2','pir3','pir4'];
+    if (DAY_IDS.includes(id))  captureDay();
+    if (WEEK_IDS.includes(id)) captureWeekReview();
+  }, 400);
+}
+
 function initInkPad(canvas) {
   const id = canvas.id;
   const h  = parseInt(canvas.dataset.h) || 120;
@@ -1280,21 +1291,24 @@ function initInkPad(canvas) {
   ctx.scale(dpr, dpr);
   ctx.fillStyle = INK_BG;
   ctx.fillRect(0, 0, w, h);
-  inkS[id] = { tool:'pen', down:false, lx:0, ly:0, dpr, w, h };
+  // lx/ly = last point; mx/my = midpoint for bezier smoothing
+  inkS[id] = { tool:'pen', down:false, lx:0, ly:0, mx:0, my:0, dpr, w, h };
 
   canvas.addEventListener('pointerdown', e => {
+    e.preventDefault();
     inkS[id].down = true;
     canvas.setPointerCapture(e.pointerId);
     const r = canvas.getBoundingClientRect();
-    const x = (e.clientX - r.left), y = (e.clientY - r.top);
+    const x = e.clientX - r.left, y = e.clientY - r.top;
     inkS[id].lx = x; inkS[id].ly = y;
+    inkS[id].mx = x; inkS[id].my = y;
     const ctx2 = canvas.getContext('2d');
     ctx2.beginPath();
     if (inkS[id].tool === 'eraser') {
       ctx2.arc(x, y, 10, 0, Math.PI*2);
       ctx2.fillStyle = INK_BG; ctx2.fill();
     } else {
-      ctx2.arc(x, y, 1, 0, Math.PI*2);
+      ctx2.arc(x, y, 1.5, 0, Math.PI*2);
       ctx2.fillStyle = INK_COLOR; ctx2.fill();
     }
   }, { passive: false });
@@ -1302,33 +1316,42 @@ function initInkPad(canvas) {
   canvas.addEventListener('pointermove', e => {
     if (!inkS[id].down) return;
     e.preventDefault();
-    const r  = canvas.getBoundingClientRect();
-    const x  = (e.clientX - r.left), y = (e.clientY - r.top);
+    const r = canvas.getBoundingClientRect();
     const ctx2 = canvas.getContext('2d');
-    ctx2.beginPath();
-    ctx2.moveTo(inkS[id].lx, inkS[id].ly);
-    ctx2.lineTo(x, y);
-    if (inkS[id].tool === 'eraser') {
-      ctx2.strokeStyle = INK_BG; ctx2.lineWidth = 20;
-    } else {
-      ctx2.strokeStyle = INK_COLOR; ctx2.lineWidth = 2;
+    // Use coalesced events for sub-frame Apple Pencil precision
+    const events = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+    for (const ev of events) {
+      const x = ev.clientX - r.left, y = ev.clientY - r.top;
+      if (inkS[id].tool === 'eraser') {
+        ctx2.beginPath();
+        ctx2.arc(x, y, 12, 0, Math.PI*2);
+        ctx2.fillStyle = INK_BG; ctx2.fill();
+      } else {
+        // Bezier curve through midpoints for smooth strokes
+        const mx = (inkS[id].lx + x) / 2;
+        const my = (inkS[id].ly + y) / 2;
+        ctx2.beginPath();
+        ctx2.moveTo(inkS[id].mx, inkS[id].my);
+        ctx2.quadraticCurveTo(inkS[id].lx, inkS[id].ly, mx, my);
+        ctx2.strokeStyle = INK_COLOR;
+        ctx2.lineWidth = 2;
+        ctx2.lineCap = 'round'; ctx2.lineJoin = 'round';
+        ctx2.stroke();
+        inkS[id].mx = mx; inkS[id].my = my;
+      }
+      inkS[id].lx = x; inkS[id].ly = y;
     }
-    ctx2.lineCap = 'round'; ctx2.lineJoin = 'round';
-    ctx2.stroke();
-    inkS[id].lx = x; inkS[id].ly = y;
   }, { passive: false });
 
   function endStroke() {
     if (!inkS[id].down) return;
     inkS[id].down = false;
-    const DAY_IDS  = ['affirmation','notes','grat1','grat2','grat3','goodThing','badThing','happyThing','discovery'];
-    const WEEK_IDS = ['wir1','wir2','wir3','wir4','pir1','pir2','pir3','pir4'];
-    if (DAY_IDS.includes(id))  captureDay();
-    if (WEEK_IDS.includes(id)) captureWeekReview();
+    scheduleInkSave(id);
   }
+  // NOTE: pointerleave intentionally NOT used — setPointerCapture keeps
+  // events routing to this canvas; adding pointerleave would cut strokes short.
   canvas.addEventListener('pointerup',     endStroke);
   canvas.addEventListener('pointercancel', endStroke);
-  canvas.addEventListener('pointerleave',  endStroke);
 }
 
 function getInkData(id) {
