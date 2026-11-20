@@ -1291,18 +1291,14 @@ function initInkPad(canvas) {
   ctx.scale(dpr, dpr);
   ctx.fillStyle = INK_BG;
   ctx.fillRect(0, 0, w, h);
-  inkS[id] = { tool:'pen', down:false, lx:0, ly:0, mx:0, my:0, dpr, w, h };
-
-  function getXY(e) {
-    const r = canvas.getBoundingClientRect();
-    const t = e.touches ? e.touches[0] : e;
-    return { x: t.clientX - r.left, y: t.clientY - r.top };
-  }
+  inkS[id] = { tool:'pen', down:false, lx:0, ly:0, mx:0, my:0, dpr, w, h, lastTap:0 };
 
   function startDraw(e) {
     e.preventDefault();
     inkS[id].down = true;
-    const { x, y } = getXY(e);
+    const r = canvas.getBoundingClientRect();
+    const t = e.touches ? e.touches[0] : e;
+    const x = t.clientX - r.left, y = t.clientY - r.top;
     inkS[id].lx = x; inkS[id].ly = y;
     inkS[id].mx = x; inkS[id].my = y;
     const ctx2 = canvas.getContext('2d');
@@ -1311,7 +1307,8 @@ function initInkPad(canvas) {
       ctx2.arc(x, y, 10, 0, Math.PI*2);
       ctx2.fillStyle = INK_BG; ctx2.fill();
     } else {
-      ctx2.arc(x, y, 1.5, 0, Math.PI*2);
+      const pressure = (t.force !== undefined && t.force > 0) ? t.force : 0.5;
+      ctx2.arc(x, y, 0.5 + pressure * 1.5, 0, Math.PI*2);
       ctx2.fillStyle = INK_COLOR; ctx2.fill();
     }
   }
@@ -1329,13 +1326,16 @@ function initInkPad(canvas) {
         ctx2.arc(x, y, 12, 0, Math.PI*2);
         ctx2.fillStyle = INK_BG; ctx2.fill();
       } else {
+        // Pressure: 0.0 (feather-light) → 1.0 (hard press) maps to 0.5–4px
+        const pressure = (t.force !== undefined && t.force > 0) ? t.force : 0.5;
+        const lineWidth = 0.5 + pressure * 3.5;
         const mx = (inkS[id].lx + x) / 2;
         const my = (inkS[id].ly + y) / 2;
         ctx2.beginPath();
         ctx2.moveTo(inkS[id].mx, inkS[id].my);
         ctx2.quadraticCurveTo(inkS[id].lx, inkS[id].ly, mx, my);
         ctx2.strokeStyle = INK_COLOR;
-        ctx2.lineWidth = 2;
+        ctx2.lineWidth = lineWidth;
         ctx2.lineCap = 'round'; ctx2.lineJoin = 'round';
         ctx2.stroke();
         inkS[id].mx = mx; inkS[id].my = my;
@@ -1348,6 +1348,17 @@ function initInkPad(canvas) {
     if (!inkS[id].down) return;
     e.preventDefault();
     inkS[id].down = false;
+
+    // Double-tap detection: two taps within 300ms toggles draw ↔ eraser
+    const now = Date.now();
+    if (now - inkS[id].lastTap < 300) {
+      const nextTool = inkS[id].tool === 'eraser' ? 'draw' : 'eraser';
+      inkMode(id, nextTool);
+      inkS[id].lastTap = 0;
+    } else {
+      inkS[id].lastTap = now;
+    }
+
     scheduleInkSave(id);
   }
 
