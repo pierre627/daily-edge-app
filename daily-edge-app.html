@@ -226,8 +226,7 @@
 
   
   /* ── Ink Pads ── */
-  .ink-wrap { margin: 0; }
-  .ink-pad { display:block; width:100%; border-radius:10px; border:1px solid var(--border); background:#f8fafc; touch-action:none; cursor:crosshair; -webkit-user-select:none; user-select:none; }
+  .ink-field { display:block; width:100%; box-sizing:border-box; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); padding:10px 12px; font-size:15px; font-family:inherit; resize:none; outline:none; line-height:1.5; }
   .ink-bar { display:flex; gap:6px; margin-top:5px; }
   .ink-textarea { width:100%; box-sizing:border-box; border-radius:10px; border:1px solid var(--border); background:var(--card2); color:var(--text); font-size:14px; padding:10px 12px; resize:vertical; outline:none; font-family:inherit; line-height:1.6; }
   .ink-textarea:focus { border-color:var(--purple); }
@@ -281,8 +280,8 @@
     <span class="date-nav-label" id="todayDateLabel"></span>
     <button class="date-nav-btn" onclick="changeDay(1)">›</button>
   </div>
-  <div class="card"><div class="card-title">Daily Affirmation</div><div class="ink-wrap" id="wrap-affirmation"><canvas class="ink-pad" id="affirmation" data-h="140"></canvas><textarea class="ink-textarea" id="txt-affirmation" placeholder="Type here…" oninput="inkTypeInput('affirmation')" style="display:none;min-height:140px"></textarea><div class="ink-bar"><button class="ink-btn ink-active" id="ibdraw-affirmation" onclick="inkMode('affirmation','draw')">✏ Draw</button><button class="ink-btn" id="ibtype-affirmation" onclick="inkMode('affirmation','type')">⌨ Type</button><button class="ink-btn" id="ibers-affirmation" onclick="inkMode('affirmation','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" id="ibclr-affirmation" onclick="inkClear('affirmation')">✕ Clear</button></div></div></div>
-  <div class="card"><div class="card-title">Notes</div><div class="ink-wrap" id="wrap-notes"><canvas class="ink-pad" id="notes" data-h="180"></canvas><textarea class="ink-textarea" id="txt-notes" placeholder="Type here…" oninput="inkTypeInput('notes')" style="display:none;min-height:180px"></textarea><div class="ink-bar"><button class="ink-btn ink-active" id="ibdraw-notes" onclick="inkMode('notes','draw')">✏ Draw</button><button class="ink-btn" id="ibtype-notes" onclick="inkMode('notes','type')">⌨ Type</button><button class="ink-btn" id="ibers-notes" onclick="inkMode('notes','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" id="ibclr-notes" onclick="inkClear('notes')">✕ Clear</button></div></div></div>
+  <div class="card"><div class="card-title">Daily Affirmation</div><textarea id="affirmation" class="ink-field" style="min-height:140px" oninput="captureDay()" placeholder="Write or type here…"></textarea></div>
+  <div class="card"><div class="card-title">Notes</div><textarea id="notes" class="ink-field" style="min-height:180px" oninput="captureDay()" placeholder="Write or type here…"></textarea></div>
   <div class="card">
     <div class="card-title">To-Do List</div>
     <div class="todo-input-row"><input type="text" id="todoInput" placeholder="Add a task..." onkeydown="if(event.key==='Enter')addTodo()"><button class="btn-add" onclick="addTodo()">+</button></div>
@@ -325,14 +324,14 @@
   </div>
   <div class="card">
     <div class="card-title">Today I Am Grateful For...</div>
-    <div class="grat-row"><span class="grat-num">1</span><div class="ink-wrap" id="wrap-grat1"><canvas class="ink-pad" id="grat1" data-h="110"></canvas><textarea class="ink-textarea" id="txt-grat1" placeholder="Type here…" oninput="inkTypeInput('grat1')" style="display:none;min-height:110px"></textarea><div class="ink-bar"><button class="ink-btn ink-active" id="ibdraw-grat1" onclick="inkMode('grat1','draw')">✏ Draw</button><button class="ink-btn" id="ibtype-grat1" onclick="inkMode('grat1','type')">⌨ Type</button><button class="ink-btn" id="ibers-grat1" onclick="inkMode('grat1','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" id="ibclr-grat1" onclick="inkClear('grat1')">✕ Clear</button></div></div></div>
-    <div class="grat-row"><span class="grat-num">2</span><div class="ink-wrap" id="wrap-grat2"><canvas class="ink-pad" id="grat2" data-h="110"></canvas><textarea class="ink-textarea" id="txt-grat2" placeholder="Type here…" oninput="inkTypeInput('grat2')" style="display:none;min-height:110px"></textarea><div class="ink-bar"><button class="ink-btn ink-active" id="ibdraw-grat2" onclick="inkMode('grat2','draw')">✏ Draw</button><button class="ink-btn" id="ibtype-grat2" onclick="inkMode('grat2','type')">⌨ Type</button><button class="ink-btn" id="ibers-grat2" onclick="inkMode('grat2','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" id="ibclr-grat2" onclick="inkClear('grat2')">✕ Clear</button></div></div></div>
-    <div class="grat-row"><span class="grat-num">3</span><div class="ink-wrap" id="wrap-grat3"><canvas class="ink-pad" id="grat3" data-h="110"></canvas><textarea class="ink-textarea" id="txt-grat3" placeholder="Type here…" oninput="inkTypeInput('grat3')" style="display:none;min-height:110px"></textarea><div class="ink-bar"><button class="ink-btn ink-active" id="ibdraw-grat3" onclick="inkMode('grat3','draw')">✏ Draw</button><button class="ink-btn" id="ibtype-grat3" onclick="inkMode('grat3','type')">⌨ Type</button><button class="ink-btn" id="ibers-grat3" onclick="inkMode('grat3','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" id="ibclr-grat3" onclick="inkClear('grat3')">✕ Clear</button></div></div></div>
+    <div class="grat-row"><span class="grat-num">1</span><textarea id="grat1" class="ink-field" style="min-height:110px" oninput="captureDay()" placeholder="Write or type here…"></textarea></div>
+    <div class="grat-row"><span class="grat-num">2</span><textarea id="grat2" class="ink-field" style="min-height:110px" oninput="captureDay()" placeholder="Write or type here…"></textarea></div>
+    <div class="grat-row"><span class="grat-num">3</span><textarea id="grat3" class="ink-field" style="min-height:110px" oninput="captureDay()" placeholder="Write or type here…"></textarea></div>
   </div>
-  <div class="card"><div class="prompt-label">This good thing happened today and I appreciate it because:</div><div class="ink-wrap" id="wrap-goodThing"><canvas class="ink-pad" id="goodThing" data-h="140"></canvas><textarea class="ink-textarea" id="txt-goodThing" placeholder="Type here…" oninput="inkTypeInput('goodThing')" style="display:none;min-height:140px"></textarea><div class="ink-bar"><button class="ink-btn ink-active" id="ibdraw-goodThing" onclick="inkMode('goodThing','draw')">✏ Draw</button><button class="ink-btn" id="ibtype-goodThing" onclick="inkMode('goodThing','type')">⌨ Type</button><button class="ink-btn" id="ibers-goodThing" onclick="inkMode('goodThing','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" id="ibclr-goodThing" onclick="inkClear('goodThing')">✕ Clear</button></div></div></div>
-  <div class="card"><div class="prompt-label">This not-so-good thing happened and this is how I handled it:</div><div class="ink-wrap" id="wrap-badThing"><canvas class="ink-pad" id="badThing" data-h="140"></canvas><textarea class="ink-textarea" id="txt-badThing" placeholder="Type here…" oninput="inkTypeInput('badThing')" style="display:none;min-height:140px"></textarea><div class="ink-bar"><button class="ink-btn ink-active" id="ibdraw-badThing" onclick="inkMode('badThing','draw')">✏ Draw</button><button class="ink-btn" id="ibtype-badThing" onclick="inkMode('badThing','type')">⌨ Type</button><button class="ink-btn" id="ibers-badThing" onclick="inkMode('badThing','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" id="ibclr-badThing" onclick="inkClear('badThing')">✕ Clear</button></div></div></div>
-  <div class="card"><div class="prompt-label">This thing made me happy today:</div><div class="ink-wrap" id="wrap-happyThing"><canvas class="ink-pad" id="happyThing" data-h="140"></canvas><textarea class="ink-textarea" id="txt-happyThing" placeholder="Type here…" oninput="inkTypeInput('happyThing')" style="display:none;min-height:140px"></textarea><div class="ink-bar"><button class="ink-btn ink-active" id="ibdraw-happyThing" onclick="inkMode('happyThing','draw')">✏ Draw</button><button class="ink-btn" id="ibtype-happyThing" onclick="inkMode('happyThing','type')">⌨ Type</button><button class="ink-btn" id="ibers-happyThing" onclick="inkMode('happyThing','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" id="ibclr-happyThing" onclick="inkClear('happyThing')">✕ Clear</button></div></div></div>
-  <div class="card"><div class="prompt-label">Today, I discovered this about myself:</div><div class="ink-wrap" id="wrap-discovery"><canvas class="ink-pad" id="discovery" data-h="140"></canvas><textarea class="ink-textarea" id="txt-discovery" placeholder="Type here…" oninput="inkTypeInput('discovery')" style="display:none;min-height:140px"></textarea><div class="ink-bar"><button class="ink-btn ink-active" id="ibdraw-discovery" onclick="inkMode('discovery','draw')">✏ Draw</button><button class="ink-btn" id="ibtype-discovery" onclick="inkMode('discovery','type')">⌨ Type</button><button class="ink-btn" id="ibers-discovery" onclick="inkMode('discovery','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" id="ibclr-discovery" onclick="inkClear('discovery')">✕ Clear</button></div></div></div>
+  <div class="card"><div class="prompt-label">This good thing happened today and I appreciate it because:</div><textarea id="goodThing" class="ink-field" style="min-height:140px" oninput="captureDay()" placeholder="Write or type here…"></textarea></div>
+  <div class="card"><div class="prompt-label">This not-so-good thing happened and this is how I handled it:</div><textarea id="badThing" class="ink-field" style="min-height:140px" oninput="captureDay()" placeholder="Write or type here…"></textarea></div>
+  <div class="card"><div class="prompt-label">This thing made me happy today:</div><textarea id="happyThing" class="ink-field" style="min-height:140px" oninput="captureDay()" placeholder="Write or type here…"></textarea></div>
+  <div class="card"><div class="prompt-label">Today, I discovered this about myself:</div><textarea id="discovery" class="ink-field" style="min-height:140px" oninput="captureDay()" placeholder="Write or type here…"></textarea></div>
 </div>
 
 <!-- WEEKLY -->
@@ -352,10 +351,10 @@
   </div>
   <div class="card">
     <div class="card-title">Weekly Improvement Review</div>
-    <div class="review-row"><div class="review-q">What improved with least effort?</div><div class="ink-wrap" id="wrap-wir1"><canvas class="ink-pad" id="wir1" data-h="110"></canvas><textarea class="ink-textarea" id="txt-wir1" placeholder="Type here…" oninput="inkTypeInput('wir1')" style="display:none;min-height:110px"></textarea><div class="ink-bar"><button class="ink-btn ink-active" id="ibdraw-wir1" onclick="inkMode('wir1','draw')">✏ Draw</button><button class="ink-btn" id="ibtype-wir1" onclick="inkMode('wir1','type')">⌨ Type</button><button class="ink-btn" id="ibers-wir1" onclick="inkMode('wir1','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" id="ibclr-wir1" onclick="inkClear('wir1')">✕ Clear</button></div></div></div>
-    <div class="review-row"><div class="review-q">What declined quietly?</div><div class="ink-wrap" id="wrap-wir2"><canvas class="ink-pad" id="wir2" data-h="110"></canvas><textarea class="ink-textarea" id="txt-wir2" placeholder="Type here…" oninput="inkTypeInput('wir2')" style="display:none;min-height:110px"></textarea><div class="ink-bar"><button class="ink-btn ink-active" id="ibdraw-wir2" onclick="inkMode('wir2','draw')">✏ Draw</button><button class="ink-btn" id="ibtype-wir2" onclick="inkMode('wir2','type')">⌨ Type</button><button class="ink-btn" id="ibers-wir2" onclick="inkMode('wir2','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" id="ibclr-wir2" onclick="inkClear('wir2')">✕ Clear</button></div></div></div>
-    <div class="review-row"><div class="review-q">Next week improves if I:</div><div class="ink-wrap" id="wrap-wir3"><canvas class="ink-pad" id="wir3" data-h="110"></canvas><textarea class="ink-textarea" id="txt-wir3" placeholder="Type here…" oninput="inkTypeInput('wir3')" style="display:none;min-height:110px"></textarea><div class="ink-bar"><button class="ink-btn ink-active" id="ibdraw-wir3" onclick="inkMode('wir3','draw')">✏ Draw</button><button class="ink-btn" id="ibtype-wir3" onclick="inkMode('wir3','type')">⌨ Type</button><button class="ink-btn" id="ibers-wir3" onclick="inkMode('wir3','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" id="ibclr-wir3" onclick="inkClear('wir3')">✕ Clear</button></div></div></div>
-    <div class="review-row"><div class="review-q">Identified repeatable actions:</div><div class="ink-wrap" id="wrap-wir4"><canvas class="ink-pad" id="wir4" data-h="110"></canvas><textarea class="ink-textarea" id="txt-wir4" placeholder="Type here…" oninput="inkTypeInput('wir4')" style="display:none;min-height:110px"></textarea><div class="ink-bar"><button class="ink-btn ink-active" id="ibdraw-wir4" onclick="inkMode('wir4','draw')">✏ Draw</button><button class="ink-btn" id="ibtype-wir4" onclick="inkMode('wir4','type')">⌨ Type</button><button class="ink-btn" id="ibers-wir4" onclick="inkMode('wir4','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" id="ibclr-wir4" onclick="inkClear('wir4')">✕ Clear</button></div></div></div>
+    <div class="review-row"><div class="review-q">What improved with least effort?</div><textarea id="wir1" class="ink-field" style="min-height:110px" oninput="captureWeekReview()" placeholder="Write or type here…"></textarea></div>
+    <div class="review-row"><div class="review-q">What declined quietly?</div><textarea id="wir2" class="ink-field" style="min-height:110px" oninput="captureWeekReview()" placeholder="Write or type here…"></textarea></div>
+    <div class="review-row"><div class="review-q">Next week improves if I:</div><textarea id="wir3" class="ink-field" style="min-height:110px" oninput="captureWeekReview()" placeholder="Write or type here…"></textarea></div>
+    <div class="review-row"><div class="review-q">Identified repeatable actions:</div><textarea id="wir4" class="ink-field" style="min-height:110px" oninput="captureWeekReview()" placeholder="Write or type here…"></textarea></div>
   </div>
 </div>
 
@@ -371,10 +370,10 @@
   <div class="card"><div class="card-title">Keystone Habits — Quality Scoring</div><div style="overflow-x:auto"><table class="quality-table"><thead><tr><th>Area</th><th>Habit</th><th>Criteria</th><th>Days<br>0-7</th><th>Qual<br>0-7</th></tr></thead><tbody id="qualityTableBody"></tbody></table></div></div>
   <div class="card">
     <div class="card-title">Weekly Improvement Review</div>
-    <div class="review-row"><div class="review-q">What improved with least effort?</div><div class="review-p">Which area gained momentum naturally?</div><div class="ink-wrap" id="wrap-pir1"><canvas class="ink-pad" id="pir1" data-h="110"></canvas><textarea class="ink-textarea" id="txt-pir1" placeholder="Type here…" oninput="inkTypeInput('pir1')" style="display:none;min-height:110px"></textarea><div class="ink-bar"><button class="ink-btn ink-active" id="ibdraw-pir1" onclick="inkMode('pir1','draw')">✏ Draw</button><button class="ink-btn" id="ibtype-pir1" onclick="inkMode('pir1','type')">⌨ Type</button><button class="ink-btn" id="ibers-pir1" onclick="inkMode('pir1','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" id="ibclr-pir1" onclick="inkClear('pir1')">✕ Clear</button></div></div></div>
-    <div class="review-row"><div class="review-q">What declined quietly?</div><div class="review-p">Which area lost ground without notice?</div><div class="ink-wrap" id="wrap-pir2"><canvas class="ink-pad" id="pir2" data-h="110"></canvas><textarea class="ink-textarea" id="txt-pir2" placeholder="Type here…" oninput="inkTypeInput('pir2')" style="display:none;min-height:110px"></textarea><div class="ink-bar"><button class="ink-btn ink-active" id="ibdraw-pir2" onclick="inkMode('pir2','draw')">✏ Draw</button><button class="ink-btn" id="ibtype-pir2" onclick="inkMode('pir2','type')">⌨ Type</button><button class="ink-btn" id="ibers-pir2" onclick="inkMode('pir2','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" id="ibclr-pir2" onclick="inkClear('pir2')">✕ Clear</button></div></div></div>
-    <div class="review-row"><div class="review-q">Next week improves if I:</div><div class="review-p">One specific action moves the needle most</div><div class="ink-wrap" id="wrap-pir3"><canvas class="ink-pad" id="pir3" data-h="110"></canvas><textarea class="ink-textarea" id="txt-pir3" placeholder="Type here…" oninput="inkTypeInput('pir3')" style="display:none;min-height:110px"></textarea><div class="ink-bar"><button class="ink-btn ink-active" id="ibdraw-pir3" onclick="inkMode('pir3','draw')">✏ Draw</button><button class="ink-btn" id="ibtype-pir3" onclick="inkMode('pir3','type')">⌨ Type</button><button class="ink-btn" id="ibers-pir3" onclick="inkMode('pir3','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" id="ibclr-pir3" onclick="inkClear('pir3')">✕ Clear</button></div></div></div>
-    <div class="review-row" style="margin-bottom:0"><div class="review-q">Identified repeatable actions?</div><div class="review-p">What pattern can I systematize?</div><div class="ink-wrap" id="wrap-pir4"><canvas class="ink-pad" id="pir4" data-h="110"></canvas><textarea class="ink-textarea" id="txt-pir4" placeholder="Type here…" oninput="inkTypeInput('pir4')" style="display:none;min-height:110px"></textarea><div class="ink-bar"><button class="ink-btn ink-active" id="ibdraw-pir4" onclick="inkMode('pir4','draw')">✏ Draw</button><button class="ink-btn" id="ibtype-pir4" onclick="inkMode('pir4','type')">⌨ Type</button><button class="ink-btn" id="ibers-pir4" onclick="inkMode('pir4','eraser')">⌫ Erase</button><button class="ink-btn ink-clr" id="ibclr-pir4" onclick="inkClear('pir4')">✕ Clear</button></div></div></div>
+    <div class="review-row"><div class="review-q">What improved with least effort?</div><div class="review-p">Which area gained momentum naturally?</div><textarea id="pir1" class="ink-field" style="min-height:110px" oninput="captureWeekReview()" placeholder="Write or type here…"></textarea></div>
+    <div class="review-row"><div class="review-q">What declined quietly?</div><div class="review-p">Which area lost ground without notice?</div><textarea id="pir2" class="ink-field" style="min-height:110px" oninput="captureWeekReview()" placeholder="Write or type here…"></textarea></div>
+    <div class="review-row"><div class="review-q">Next week improves if I:</div><div class="review-p">One specific action moves the needle most</div><textarea id="pir3" class="ink-field" style="min-height:110px" oninput="captureWeekReview()" placeholder="Write or type here…"></textarea></div>
+    <div class="review-row" style="margin-bottom:0"><div class="review-q">Identified repeatable actions?</div><div class="review-p">What pattern can I systematize?</div><textarea id="pir4" class="ink-field" style="min-height:110px" oninput="captureWeekReview()" placeholder="Write or type here…"></textarea></div>
   </div>
 </div>
 
@@ -1260,211 +1259,17 @@ function escAttr(s) { return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39
 // INK PADS (Apple Pencil drawing)
 // ══════════════════════════════════════
 const INK_BG = '#f8fafc';
-const INK_COLOR = '#0f172a';
-const inkS = {}; // per-canvas state
-
-function initAllInkPads() {
-  document.querySelectorAll('.ink-pad').forEach(c => initInkPad(c));
-}
-
-const inkSaveTimers = {};
-function scheduleInkSave(id) {
-  clearTimeout(inkSaveTimers[id]);
-  inkSaveTimers[id] = setTimeout(() => {
-    const DAY_IDS  = ['affirmation','notes','grat1','grat2','grat3','goodThing','badThing','happyThing','discovery'];
-    const WEEK_IDS = ['wir1','wir2','wir3','wir4','pir1','pir2','pir3','pir4'];
-    if (DAY_IDS.includes(id))  captureDay();
-    if (WEEK_IDS.includes(id)) captureWeekReview();
-  }, 400);
-}
-
-function initInkPad(canvas) {
-  const id = canvas.id;
-  const h  = parseInt(canvas.dataset.h) || 120;
-  const dpr = window.devicePixelRatio || 1;
-  const w   = canvas.parentElement?.offsetWidth || 320;
-  canvas.width  = w  * dpr;
-  canvas.height = h  * dpr;
-  canvas.style.width  = w  + 'px';
-  canvas.style.height = h  + 'px';
-  const ctx = canvas.getContext('2d');
-  ctx.scale(dpr, dpr);
-  ctx.fillStyle = INK_BG;
-  ctx.fillRect(0, 0, w, h);
-  inkS[id] = { tool:'pen', down:false, lx:0, ly:0, mx:0, my:0, dpr, w, h, lastTap:0 };
-
-  function startDraw(e) {
-    e.preventDefault();
-    inkS[id].down = true;
-    const r = canvas.getBoundingClientRect();
-    const t = e.touches ? e.touches[0] : e;
-    const x = t.clientX - r.left, y = t.clientY - r.top;
-    inkS[id].lx = x; inkS[id].ly = y;
-    inkS[id].mx = x; inkS[id].my = y;
-    const ctx2 = canvas.getContext('2d');
-    ctx2.beginPath();
-    if (inkS[id].tool === 'eraser') {
-      ctx2.arc(x, y, 10, 0, Math.PI*2);
-      ctx2.fillStyle = INK_BG; ctx2.fill();
-    } else {
-      const pressure = (t.force !== undefined && t.force > 0) ? t.force : 0.5;
-      ctx2.arc(x, y, 0.5 + pressure * 1.5, 0, Math.PI*2);
-      ctx2.fillStyle = INK_COLOR; ctx2.fill();
-    }
-  }
-
-  function moveDraw(e) {
-    if (!inkS[id].down) return;
-    e.preventDefault();
-    const ctx2 = canvas.getContext('2d');
-    const pts = e.touches ? Array.from(e.touches).slice(0,1) : [e];
-    for (const t of pts) {
-      const r = canvas.getBoundingClientRect();
-      const x = t.clientX - r.left, y = t.clientY - r.top;
-      if (inkS[id].tool === 'eraser') {
-        ctx2.beginPath();
-        ctx2.arc(x, y, 12, 0, Math.PI*2);
-        ctx2.fillStyle = INK_BG; ctx2.fill();
-      } else {
-        // Pressure: 0.0 (feather-light) → 1.0 (hard press) maps to 0.5–4px
-        const pressure = (t.force !== undefined && t.force > 0) ? t.force : 0.5;
-        const lineWidth = 0.5 + pressure * 3.5;
-        const mx = (inkS[id].lx + x) / 2;
-        const my = (inkS[id].ly + y) / 2;
-        ctx2.beginPath();
-        ctx2.moveTo(inkS[id].mx, inkS[id].my);
-        ctx2.quadraticCurveTo(inkS[id].lx, inkS[id].ly, mx, my);
-        ctx2.strokeStyle = INK_COLOR;
-        ctx2.lineWidth = lineWidth;
-        ctx2.lineCap = 'round'; ctx2.lineJoin = 'round';
-        ctx2.stroke();
-        inkS[id].mx = mx; inkS[id].my = my;
-      }
-      inkS[id].lx = x; inkS[id].ly = y;
-    }
-  }
-
-  function endDraw(e) {
-    if (!inkS[id].down) return;
-    e.preventDefault();
-    inkS[id].down = false;
-
-    // Double-tap detection: two taps within 300ms toggles draw ↔ eraser
-    const now = Date.now();
-    if (now - inkS[id].lastTap < 300) {
-      const nextTool = inkS[id].tool === 'eraser' ? 'draw' : 'eraser';
-      inkMode(id, nextTool);
-      inkS[id].lastTap = 0;
-    } else {
-      inkS[id].lastTap = now;
-    }
-
-    scheduleInkSave(id);
-  }
-
-  // Touch events — most reliable for Apple Pencil on iOS Safari
-  canvas.addEventListener('touchstart',  startDraw, { passive: false });
-  canvas.addEventListener('touchmove',   moveDraw,  { passive: false });
-  canvas.addEventListener('touchend',    endDraw,   { passive: false });
-  canvas.addEventListener('touchcancel', endDraw,   { passive: false });
-
-  // Pointer events as fallback for non-touch (mouse/trackpad on desktop)
-  canvas.addEventListener('pointerdown', e => { if (e.pointerType === 'mouse') startDraw(e); }, { passive: false });
-  canvas.addEventListener('pointermove', e => { if (e.pointerType === 'mouse') moveDraw(e);  }, { passive: false });
-  canvas.addEventListener('pointerup',   e => { if (e.pointerType === 'mouse') endDraw(e);   }, { passive: false });
-}
-
 function getInkData(id) {
-  // If type mode is active, return the textarea text
-  const txt = document.getElementById('txt-'+id);
-  if (txt && txt.style.display !== 'none') return txt.value;
-  const c = document.getElementById(id);
-  if (!c || !c.getContext) return '';
-  return c.toDataURL('image/png');
+  const el = document.getElementById(id);
+  return el ? el.value : '';
 }
 
 function setInkData(id, value) {
-  if (value && value.startsWith('data:image/')) {
-    // Ink drawing — show canvas
-    inkMode(id, 'draw');
-    const c = document.getElementById(id);
-    if (!c || !c.getContext) return;
-    if (!inkS[id]) initInkPad(c);
-    const ctx = c.getContext('2d');
-    const { w, h } = inkS[id];
-    ctx.fillStyle = INK_BG; ctx.fillRect(0, 0, w, h);
-    const img = new Image();
-    img.onload = () => ctx.drawImage(img, 0, 0, w, h);
-    img.src = value;
-  } else if (value && value.trim()) {
-    // Typed text — show textarea
-    inkMode(id, 'type');
-    const txt = document.getElementById('txt-'+id);
-    if (txt) txt.value = value;
-  } else {
-    // Empty — default draw mode, clear canvas
-    inkMode(id, 'draw');
-    const c = document.getElementById(id);
-    if (c && inkS[id]) {
-      const ctx = c.getContext('2d');
-      ctx.fillStyle = INK_BG; ctx.fillRect(0, 0, inkS[id].w, inkS[id].h);
-    }
-  }
+  const el = document.getElementById(id);
+  if (el) el.value = (value && !value.startsWith('data:image/')) ? value : '';
 }
 
-function inkMode(id, mode) {
-  const canvas  = document.getElementById(id);
-  const txtArea = document.getElementById('txt-'+id);
-  const drawBtn = document.getElementById('ibdraw-'+id);
-  const typeBtn = document.getElementById('ibtype-'+id);
-  const ersBtn  = document.getElementById('ibers-'+id);
-  const clrBtn  = document.getElementById('ibclr-'+id);
-  if (mode === 'type') {
-    if (canvas)  canvas.style.display  = 'none';
-    if (txtArea) txtArea.style.display = 'block';
-    drawBtn?.classList.remove('ink-active');
-    typeBtn?.classList.add('ink-active');
-    if (ersBtn) ersBtn.style.display = 'none';
-    if (inkS[id]) inkS[id].inputMode = 'type';
-    txtArea?.focus();
-  } else if (mode === 'eraser') {
-    if (canvas)  canvas.style.display  = 'block';
-    if (txtArea) txtArea.style.display = 'none';
-    drawBtn?.classList.add('ink-active');
-    typeBtn?.classList.remove('ink-active');
-    if (ersBtn) ersBtn.style.display = '';
-    if (inkS[id]) { inkS[id].inputMode = 'draw'; inkS[id].tool = 'eraser'; }
-    ersBtn?.classList.add('ink-active');
-  } else { // draw / pen
-    if (canvas)  canvas.style.display  = 'block';
-    if (txtArea) txtArea.style.display = 'none';
-    drawBtn?.classList.add('ink-active');
-    typeBtn?.classList.remove('ink-active');
-    if (ersBtn) { ersBtn.style.display = ''; ersBtn.classList.remove('ink-active'); }
-    if (inkS[id]) { inkS[id].inputMode = 'draw'; inkS[id].tool = 'pen'; }
-  }
-}
-
-function inkClear(id) {
-  const c = document.getElementById(id);
-  if (c && inkS[id]) {
-    const ctx = c.getContext('2d');
-    ctx.fillStyle = INK_BG; ctx.fillRect(0, 0, inkS[id].w, inkS[id].h);
-  }
-  const txt = document.getElementById('txt-'+id);
-  if (txt) txt.value = '';
-  const DAY_IDS  = ['affirmation','notes','grat1','grat2','grat3','goodThing','badThing','happyThing','discovery'];
-  const WEEK_IDS = ['wir1','wir2','wir3','wir4','pir1','pir2','pir3','pir4'];
-  if (DAY_IDS.includes(id))  captureDay();
-  if (WEEK_IDS.includes(id)) captureWeekReview();
-}
-
-function inkTypeInput(id) {
-  const DAY_IDS  = ['affirmation','notes','grat1','grat2','grat3','goodThing','badThing','happyThing','discovery'];
-  const WEEK_IDS = ['wir1','wir2','wir3','wir4','pir1','pir2','pir3','pir4'];
-  if (DAY_IDS.includes(id))  captureDay();
-  if (WEEK_IDS.includes(id)) captureWeekReview();
-}
+function initAllInkPads() { /* no-op — now using native textareas */ }
 
 </script>
 </body>
